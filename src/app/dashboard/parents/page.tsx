@@ -1,8 +1,46 @@
 "use client";
 
 import { api } from "~/lib/trpc-provider";
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import { Card, CardContent } from "~/components/ui/card";
+import { Badge } from "~/components/ui/badge";
+import { Button } from "~/components/ui/button";
+import { Input } from "~/components/ui/input";
+import { Label } from "~/components/ui/label";
+import { Textarea } from "~/components/ui/textarea";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "~/components/ui/dialog";
+import { Skeleton } from "~/components/ui/skeleton";
+import { useToast } from "~/hooks/use-toast";
 import { useState } from "react";
+import {
+  UsersRound,
+  Plus,
+  Search,
+  Edit,
+  Trash2,
+  Mail,
+  Phone,
+  Briefcase,
+  Users,
+  ChevronLeft,
+  ChevronRight,
+  MoreVertical,
+  UserCheck,
+  CheckCircle2,
+} from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 
 type ParentForm = {
   name: string;
@@ -30,6 +68,7 @@ export default function ParentsPage() {
     occupation: "",
   });
 
+  const { toast } = useToast();
   const utils = api.useUtils();
   const { data, isLoading } = api.parent.getAll.useQuery({
     page,
@@ -41,10 +80,17 @@ export default function ParentsPage() {
     onSuccess: () => {
       utils.parent.getAll.invalidate();
       closeModal();
-      alert("Wali siswa berhasil ditambahkan!");
+      toast({
+        title: "Berhasil!",
+        description: "Wali siswa berhasil ditambahkan.",
+      });
     },
     onError: (error) => {
-      alert(`Error: ${error.message}`);
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
     },
   });
 
@@ -52,20 +98,34 @@ export default function ParentsPage() {
     onSuccess: () => {
       utils.parent.getAll.invalidate();
       closeModal();
-      alert("Data wali siswa berhasil diupdate!");
+      toast({
+        title: "Berhasil!",
+        description: "Data wali siswa berhasil diupdate.",
+      });
     },
     onError: (error) => {
-      alert(`Error: ${error.message}`);
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
     },
   });
 
   const deleteMutation = api.parent.delete.useMutation({
     onSuccess: () => {
       utils.parent.getAll.invalidate();
-      alert("Wali siswa berhasil dihapus!");
+      toast({
+        title: "Berhasil!",
+        description: "Wali siswa berhasil dihapus.",
+      });
     },
     onError: (error) => {
-      alert(`Error: ${error.message}`);
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
     },
   });
 
@@ -95,7 +155,7 @@ export default function ParentsPage() {
       email: parent.user.email || "",
       phone: parent.user.phone || "",
       address: parent.user.address || "",
-      password: "", // Don't populate password for edit
+      password: "",
       nik: parent.user.nik || "",
       occupation: parent.occupation || "",
     });
@@ -121,12 +181,20 @@ export default function ParentsPage() {
     e.preventDefault();
 
     if (!formData.name.trim()) {
-      alert("Nama harus diisi!");
+      toast({
+        title: "Error",
+        description: "Nama harus diisi!",
+        variant: "destructive",
+      });
       return;
     }
 
     if (!isEditing && !formData.password) {
-      alert("Password harus diisi untuk wali baru!");
+      toast({
+        title: "Error",
+        description: "Password harus diisi untuk wali baru!",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -159,374 +227,477 @@ export default function ParentsPage() {
     }
   };
 
+  const getInitials = (name: string) => {
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-lg">Loading parents...</div>
+      <div className="space-y-6">
+        <div className="h-48 rounded-xl bg-gradient-to-r from-purple-600 via-pink-600 to-rose-600 animate-pulse" />
+        <div className="grid gap-4 md:grid-cols-3">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <Card key={i}>
+              <CardContent className="p-6">
+                <Skeleton className="h-20 w-full" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <Card key={i}>
+              <CardContent className="p-6">
+                <Skeleton className="h-48 w-full" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       </div>
     );
   }
 
   return (
-    <div>
-      {/* Header */}
-      <div className="mb-8 flex items-center justify-between">
-        <div>
-          <h2 className="text-3xl font-bold">Data Wali Siswa</h2>
-          <p className="text-muted-foreground">Kelola data orang tua/wali siswa</p>
-        </div>
-        <button
-          onClick={openAddModal}
-          className="rounded-lg bg-primary px-4 py-2 text-white hover:bg-primary/90"
-        >
-          + Tambah Wali
-        </button>
-      </div>
-
-      {/* Modal Form */}
-      {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-lg bg-white p-6 shadow-xl">
-            <h3 className="mb-4 text-xl font-bold">
-              {isEditing ? "Edit Data Wali" : "Tambah Wali Baru"}
-            </h3>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                {/* Name */}
-                <div>
-                  <label className="mb-2 block text-sm font-medium">
-                    Nama Lengkap <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.name}
-                    onChange={(e) =>
-                      setFormData({ ...formData, name: e.target.value })
-                    }
-                    className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-primary focus:outline-none"
-                    placeholder="Nama lengkap wali"
-                    required
-                  />
-                </div>
-
-                {/* NIK */}
-                <div>
-                  <label className="mb-2 block text-sm font-medium">NIK</label>
-                  <input
-                    type="text"
-                    value={formData.nik}
-                    onChange={(e) =>
-                      setFormData({ ...formData, nik: e.target.value })
-                    }
-                    className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-primary focus:outline-none"
-                    placeholder="Nomor Induk Kependudukan"
-                  />
-                </div>
-
-                {/* Email */}
-                <div>
-                  <label className="mb-2 block text-sm font-medium">Email</label>
-                  <input
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) =>
-                      setFormData({ ...formData, email: e.target.value })
-                    }
-                    className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-primary focus:outline-none"
-                    placeholder="email@example.com"
-                  />
-                </div>
-
-                {/* Phone */}
-                <div>
-                  <label className="mb-2 block text-sm font-medium">
-                    No. Telepon
-                  </label>
-                  <input
-                    type="tel"
-                    value={formData.phone}
-                    onChange={(e) =>
-                      setFormData({ ...formData, phone: e.target.value })
-                    }
-                    className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-primary focus:outline-none"
-                    placeholder="08xxxxxxxxxx"
-                  />
-                </div>
-
-                {/* Occupation */}
-                <div>
-                  <label className="mb-2 block text-sm font-medium">
-                    Pekerjaan
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.occupation}
-                    onChange={(e) =>
-                      setFormData({ ...formData, occupation: e.target.value })
-                    }
-                    className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-primary focus:outline-none"
-                    placeholder="Contoh: PNS, Wiraswasta"
-                  />
-                </div>
-
-                {/* Password - only for new parent */}
-                {!isEditing && (
-                  <div>
-                    <label className="mb-2 block text-sm font-medium">
-                      Password <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="password"
-                      value={formData.password}
-                      onChange={(e) =>
-                        setFormData({ ...formData, password: e.target.value })
-                      }
-                      className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-primary focus:outline-none"
-                      placeholder="Minimal 6 karakter"
-                      required={!isEditing}
-                    />
-                  </div>
-                )}
-
-                {/* Address - full width */}
-                <div className="md:col-span-2">
-                  <label className="mb-2 block text-sm font-medium">Alamat</label>
-                  <textarea
-                    value={formData.address}
-                    onChange={(e) =>
-                      setFormData({ ...formData, address: e.target.value })
-                    }
-                    className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-primary focus:outline-none"
-                    placeholder="Alamat lengkap"
-                    rows={2}
-                  />
-                </div>
+    <div className="space-y-6">
+      {/* Header with Gradient Background */}
+      <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-purple-600 via-pink-600 to-rose-600 p-8 text-white shadow-lg">
+        <div className="relative z-10">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="rounded-full bg-white/20 p-4 backdrop-blur-sm">
+                <UsersRound className="h-8 w-8" />
               </div>
-
-              <div className="flex space-x-2 pt-4">
-                <button
-                  type="button"
-                  onClick={closeModal}
-                  className="flex-1 rounded-lg border border-gray-300 px-4 py-2 hover:bg-gray-50"
-                >
-                  Batal
-                </button>
-                <button
-                  type="submit"
-                  disabled={createMutation.isPending || updateMutation.isPending}
-                  className="flex-1 rounded-lg bg-primary px-4 py-2 text-white hover:bg-primary/90 disabled:opacity-50"
-                >
-                  {createMutation.isPending || updateMutation.isPending
-                    ? "Menyimpan..."
-                    : isEditing
-                    ? "Update"
-                    : "Simpan"}
-                </button>
+              <div>
+                <h1 className="text-4xl font-bold">Data Wali Siswa</h1>
+                <p className="mt-2 text-purple-100">
+                  Kelola data orang tua dan wali siswa
+                </p>
               </div>
-            </form>
+            </div>
+            <Button
+              onClick={openAddModal}
+              size="lg"
+              className="bg-white text-pink-600 hover:bg-white/90"
+            >
+              <Plus className="mr-2 h-5 w-5" />
+              Tambah Wali
+            </Button>
           </div>
         </div>
-      )}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute right-0 top-0 h-64 w-64 rounded-full bg-white"></div>
+          <div className="absolute bottom-0 left-0 h-48 w-48 rounded-full bg-white"></div>
+        </div>
+      </div>
 
-      {/* Search Card */}
-      <Card className="mb-6">
+      {/* Quick Stats */}
+      <div className="grid gap-4 md:grid-cols-3">
+        <Card className="overflow-hidden border-l-4 border-l-purple-500 transition-all hover:shadow-lg">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Total Wali
+                </p>
+                <p className="mt-2 text-3xl font-bold">
+                  {pagination?.total ?? 0}
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Orang tua/wali
+                </p>
+              </div>
+              <div className="rounded-full bg-purple-100 p-4">
+                <UsersRound className="h-7 w-7 text-purple-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="overflow-hidden border-l-4 border-l-pink-500 transition-all hover:shadow-lg">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Total Siswa
+                </p>
+                <p className="mt-2 text-3xl font-bold">
+                  {parents.reduce((sum, p) => sum + p._count.students, 0)}
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Anak terdaftar
+                </p>
+              </div>
+              <div className="rounded-full bg-pink-100 p-4">
+                <Users className="h-7 w-7 text-pink-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="overflow-hidden border-l-4 border-l-rose-500 transition-all hover:shadow-lg">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Bekerja
+                </p>
+                <p className="mt-2 text-3xl font-bold">
+                  {parents.filter((p) => p.occupation).length}
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Punya pekerjaan
+                </p>
+              </div>
+              <div className="rounded-full bg-rose-100 p-4">
+                <Briefcase className="h-7 w-7 text-rose-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Filters */}
+      <Card>
         <CardContent className="pt-6">
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            {/* Search */}
-            <div>
-              <label className="mb-2 block text-sm font-medium">
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="search" className="flex items-center gap-2">
+                <Search className="h-4 w-4" />
                 Cari Wali Siswa
-              </label>
-              <input
+              </Label>
+              <Input
+                id="search"
                 type="text"
-                placeholder="Nama wali siswa..."
+                placeholder="Nama, email, telepon..."
                 value={search}
                 onChange={(e) => {
                   setSearch(e.target.value);
                   setPage(1);
                 }}
-                className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-primary focus:outline-none"
               />
             </div>
-
-            {/* Quick Stats */}
-            <div className="flex items-end justify-end space-x-4">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-primary">
-                  {pagination?.total ?? 0}
-                </div>
-                <p className="text-xs text-muted-foreground">Total Wali</p>
-              </div>
+            <div className="flex items-end">
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => {
+                  setSearch("");
+                  setPage(1);
+                }}
+              >
+                Reset Filter
+              </Button>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Parents Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Daftar Wali Siswa ({pagination?.total ?? 0} wali)</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {parents.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground">
-              <div className="text-4xl mb-4">👨‍👩‍👧</div>
-              <p>Belum ada data wali siswa</p>
-            </div>
-          ) : (
-            <>
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b bg-gray-50">
-                      <th className="px-4 py-3 text-left text-sm font-semibold">
-                        No
-                      </th>
-                      <th className="px-4 py-3 text-left text-sm font-semibold">
-                        Nama
-                      </th>
-                      <th className="px-4 py-3 text-left text-sm font-semibold">
-                        Kontak
-                      </th>
-                      <th className="px-4 py-3 text-left text-sm font-semibold">
-                        Pekerjaan
-                      </th>
-                      <th className="px-4 py-3 text-left text-sm font-semibold">
-                        Jumlah Anak
-                      </th>
-                      <th className="px-4 py-3 text-left text-sm font-semibold">
-                        Aksi
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {parents.map((parent, index) => (
-                      <tr
-                        key={parent.id}
-                        className="border-b hover:bg-gray-50"
+      {/* Parents Grid */}
+      {parents.length === 0 ? (
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center py-16">
+            <UsersRound className="mb-4 h-16 w-16 text-muted-foreground" />
+            <h3 className="text-xl font-semibold">Tidak ada data wali</h3>
+            <p className="mt-2 text-muted-foreground">
+              Mulai tambahkan data wali dengan klik tombol "Tambah Wali"
+            </p>
+          </CardContent>
+        </Card>
+      ) : (
+        <>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {parents.map((parent) => (
+              <Card
+                key={parent.id}
+                className="overflow-hidden transition-all hover:shadow-lg"
+              >
+                <CardContent className="p-6">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-start gap-3">
+                      <Avatar className="h-14 w-14 border-2 border-primary/20">
+                        <AvatarImage src={parent.user.image ?? undefined} />
+                        <AvatarFallback className="bg-gradient-to-br from-purple-500 to-pink-500 text-lg font-semibold text-white">
+                          {getInitials(parent.user.name)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1">
+                        <h3 className="font-semibold leading-tight">
+                          {parent.user.name}
+                        </h3>
+                        {parent.occupation && (
+                          <Badge
+                            variant="outline"
+                            className="mt-1.5 bg-purple-100 text-purple-800 border-purple-200"
+                          >
+                            <Briefcase className="mr-1 h-3 w-3" />
+                            {parent.occupation}
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <MoreVertical className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem
+                          onClick={() => openEditModal(parent)}
+                        >
+                          <Edit className="mr-2 h-4 w-4" />
+                          Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          className="text-red-600"
+                          onClick={() =>
+                            handleDelete(parent.id, parent.user.name)
+                          }
+                        >
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          Hapus
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+
+                  <div className="mt-4 space-y-2 border-t pt-4">
+                    {parent.user.email && (
+                      <div className="flex items-center gap-2 text-sm">
+                        <Mail className="h-4 w-4 text-muted-foreground" />
+                        <span className="truncate text-muted-foreground">
+                          {parent.user.email}
+                        </span>
+                      </div>
+                    )}
+
+                    {parent.user.phone && (
+                      <div className="flex items-center gap-2 text-sm">
+                        <Phone className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-muted-foreground">
+                          {parent.user.phone}
+                        </span>
+                      </div>
+                    )}
+
+                    <div className="flex items-center gap-2 text-sm">
+                      <UserCheck className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-muted-foreground">
+                        {parent._count.students} anak terdaftar
+                      </span>
+                      <Badge
+                        variant="secondary"
+                        className="ml-auto bg-blue-100 text-blue-700"
                       >
-                        <td className="px-4 py-3 text-sm">
-                          {(page - 1) * 10 + index + 1}
-                        </td>
-                        <td className="px-4 py-3">
-                          <div>
-                            <p className="font-medium">{parent.user.name}</p>
-                            {parent.user.nik && (
-                              <p className="text-xs text-gray-500">
-                                NIK: {parent.user.nik}
-                              </p>
-                            )}
-                          </div>
-                        </td>
-                        <td className="px-4 py-3 text-sm">
-                          <div>
-                            {parent.user.phone && (
-                              <p className="text-xs">{parent.user.phone}</p>
-                            )}
-                            {parent.user.email && (
-                              <p className="text-xs text-gray-500">
-                                {parent.user.email}
-                              </p>
-                            )}
-                            {!parent.user.phone && !parent.user.email && (
-                              <p className="text-gray-400">-</p>
-                            )}
-                          </div>
-                        </td>
-                        <td className="px-4 py-3 text-sm">
-                          {parent.occupation ? (
-                            <span className="text-sm">{parent.occupation}</span>
-                          ) : (
-                            <span className="text-gray-400">-</span>
+                        {parent._count.students} Siswa
+                      </Badge>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          {/* Pagination */}
+          {pagination && pagination.totalPages > 1 && (
+            <Card>
+              <CardContent className="flex items-center justify-between p-4">
+                <div className="text-sm text-muted-foreground">
+                  Menampilkan {(page - 1) * 10 + 1} -{" "}
+                  {Math.min(page * 10, pagination.total)} dari{" "}
+                  {pagination.total} wali
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPage(page - 1)}
+                    disabled={page === 1}
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  <div className="flex gap-1">
+                    {Array.from(
+                      { length: pagination.totalPages },
+                      (_, i) => i + 1
+                    )
+                      .filter(
+                        (p) =>
+                          p === 1 ||
+                          p === pagination.totalPages ||
+                          (p >= page - 1 && p <= page + 1)
+                      )
+                      .map((p, i, arr) => (
+                        <div key={p} className="contents">
+                          {i > 0 && arr[i - 1] !== p - 1 && (
+                            <span className="flex items-center px-2 text-sm text-muted-foreground">
+                              ...
+                            </span>
                           )}
-                        </td>
-                        <td className="px-4 py-3 text-sm">
-                          <span className="inline-block rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-800">
-                            {parent._count.students} anak
-                          </span>
-                        </td>
-                        <td className="px-4 py-3">
-                          <div className="flex space-x-2">
-                            <button
-                              onClick={() => openEditModal(parent)}
-                              className="rounded bg-yellow-500 px-3 py-1 text-xs text-white hover:bg-yellow-600"
-                            >
-                              Edit
-                            </button>
-                            <button
-                              onClick={() => handleDelete(parent.id, parent.user.name)}
-                              disabled={deleteMutation.isPending}
-                              className="rounded bg-red-500 px-3 py-1 text-xs text-white hover:bg-red-600 disabled:opacity-50"
-                            >
-                              {deleteMutation.isPending ? "..." : "Hapus"}
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                          <Button
+                            variant={page === p ? "default" : "outline"}
+                            size="sm"
+                            onClick={() => setPage(p)}
+                            className="min-w-[2.5rem]"
+                          >
+                            {p}
+                          </Button>
+                        </div>
+                      ))}
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPage(page + 1)}
+                    disabled={page === pagination.totalPages}
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </>
+      )}
+
+      {/* Modal Form */}
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              {isEditing ? "Edit Data Wali" : "Tambah Wali Baru"}
+            </DialogTitle>
+            <DialogDescription>
+              {isEditing
+                ? "Perbarui informasi data wali siswa"
+                : "Lengkapi form untuk menambahkan wali baru"}
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="name">
+                  Nama Lengkap <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="name"
+                  type="text"
+                  value={formData.name}
+                  onChange={(e) =>
+                    setFormData({ ...formData, name: e.target.value })
+                  }
+                  placeholder="Nama lengkap wali"
+                  required
+                />
               </div>
 
-              {/* Pagination */}
-              {pagination && pagination.totalPages > 1 && (
-                <div className="mt-6 flex items-center justify-between">
-                  <div className="text-sm text-gray-600">
-                    Menampilkan {(page - 1) * 10 + 1} -{" "}
-                    {Math.min(page * 10, pagination.total)} dari{" "}
-                    {pagination.total} wali
-                  </div>
-                  <div className="flex space-x-2">
-                    <button
-                      onClick={() => setPage(page - 1)}
-                      disabled={page === 1}
-                      className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                      Previous
-                    </button>
-                    <div className="flex space-x-1">
-                      {Array.from(
-                        { length: pagination.totalPages },
-                        (_, i) => i + 1
-                      )
-                        .filter(
-                          (p) =>
-                            p === 1 ||
-                            p === pagination.totalPages ||
-                            (p >= page - 1 && p <= page + 1)
-                        )
-                        .map((p, i, arr) => (
-                          <div key={p} className="contents">
-                            {i > 0 && arr[i - 1] !== p - 1 && (
-                              <span className="px-2 py-2 text-sm">...</span>
-                            )}
-                            <button
-                              onClick={() => setPage(p)}
-                              className={`rounded-lg px-4 py-2 text-sm font-medium ${
-                                page === p
-                                  ? "bg-primary text-white"
-                                  : "border border-gray-300 hover:bg-gray-50"
-                              }`}
-                            >
-                              {p}
-                            </button>
-                          </div>
-                        ))}
-                    </div>
-                    <button
-                      onClick={() => setPage(page + 1)}
-                      disabled={page === pagination.totalPages}
-                      className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                      Next
-                    </button>
-                  </div>
+              <div className="space-y-2">
+                <Label htmlFor="nik">NIK</Label>
+                <Input
+                  id="nik"
+                  type="text"
+                  value={formData.nik}
+                  onChange={(e) =>
+                    setFormData({ ...formData, nik: e.target.value })
+                  }
+                  placeholder="Nomor Induk Kependudukan"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) =>
+                    setFormData({ ...formData, email: e.target.value })
+                  }
+                  placeholder="email@example.com"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="phone">No. Telepon</Label>
+                <Input
+                  id="phone"
+                  type="tel"
+                  value={formData.phone}
+                  onChange={(e) =>
+                    setFormData({ ...formData, phone: e.target.value })
+                  }
+                  placeholder="08xxxxxxxxxx"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="occupation">Pekerjaan</Label>
+                <Input
+                  id="occupation"
+                  type="text"
+                  value={formData.occupation}
+                  onChange={(e) =>
+                    setFormData({ ...formData, occupation: e.target.value })
+                  }
+                  placeholder="Contoh: PNS, Wiraswasta"
+                />
+              </div>
+
+              {!isEditing && (
+                <div className="space-y-2">
+                  <Label htmlFor="password">
+                    Password <span className="text-red-500">*</span>
+                  </Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    value={formData.password}
+                    onChange={(e) =>
+                      setFormData({ ...formData, password: e.target.value })
+                    }
+                    placeholder="Minimal 6 karakter"
+                    required={!isEditing}
+                  />
                 </div>
               )}
-            </>
-          )}
-        </CardContent>
-      </Card>
+
+              <div className="space-y-2 md:col-span-2">
+                <Label htmlFor="address">Alamat</Label>
+                <Textarea
+                  id="address"
+                  value={formData.address}
+                  onChange={(e) =>
+                    setFormData({ ...formData, address: e.target.value })
+                  }
+                  placeholder="Alamat lengkap"
+                  rows={2}
+                />
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={closeModal}>
+                Batal
+              </Button>
+              <Button
+                type="submit"
+                disabled={createMutation.isPending || updateMutation.isPending}
+              >
+                {createMutation.isPending || updateMutation.isPending
+                  ? "Menyimpan..."
+                  : isEditing
+                  ? "Update"
+                  : "Simpan"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
