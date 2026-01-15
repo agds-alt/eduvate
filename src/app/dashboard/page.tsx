@@ -1,286 +1,495 @@
 "use client";
 
+import { useMemo } from "react";
 import Link from "next/link";
 import { api } from "~/lib/trpc-provider";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import { Skeleton } from "~/components/ui/skeleton";
+import {
+  Users,
+  GraduationCap,
+  School,
+  BarChart3,
+  UserCheck,
+  UsersRound,
+  BookOpen,
+  TrendingUp,
+  DollarSign,
+  AlertCircle,
+  CheckCircle2,
+  Clock,
+  FileText,
+  Calendar,
+  MapPin,
+  Bell,
+  Palmtree,
+  CalendarDays,
+  AlertTriangle,
+} from "lucide-react";
+
+// Loading Skeleton Components
+function StatCardSkeleton() {
+  return (
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <Skeleton className="h-4 w-24" />
+        <Skeleton className="h-8 w-8 rounded-full" />
+      </CardHeader>
+      <CardContent>
+        <Skeleton className="mb-2 h-8 w-16" />
+        <Skeleton className="h-3 w-32" />
+      </CardContent>
+    </Card>
+  );
+}
 
 export default function DashboardPage() {
-  const { data: dashboardData, isLoading } = api.dashboard.getStats.useQuery();
-  const { data: comprehensiveStats } = api.dashboard.getComprehensiveStats.useQuery();
-  const { data: attendanceSummary } = api.dashboard.getAttendanceSummary.useQuery();
-  const { data: recentStudents } = api.dashboard.getRecentStudents.useQuery({ limit: 5 });
+  // Fetch all data in parallel for better performance
+  const { data: dashboardData, isLoading: isDashboardLoading } = api.dashboard.getStats.useQuery();
+  const { data: comprehensiveStats, isLoading: isComprehensiveLoading } =
+    api.dashboard.getComprehensiveStats.useQuery();
+  const { data: attendanceSummary, isLoading: isAttendanceLoading } =
+    api.dashboard.getAttendanceSummary.useQuery();
+  const { data: recentStudents, isLoading: isStudentsLoading } =
+    api.dashboard.getRecentStudents.useQuery({ limit: 5 });
 
-  if (isLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-lg">Loading dashboard...</div>
-      </div>
-    );
-  }
+  // Memoize currency formatter
+  const formatCurrency = useMemo(
+    () => (amount: number) =>
+      new Intl.NumberFormat("id-ID", {
+        style: "currency",
+        currency: "IDR",
+        minimumFractionDigits: 0,
+      }).format(amount),
+    []
+  );
 
-  if (!dashboardData?.school) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-lg">No school data found</div>
-      </div>
-    );
-  }
-
-  // Format currency
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("id-ID", {
-      style: "currency",
-      currency: "IDR",
-      minimumFractionDigits: 0,
-    }).format(amount);
-  };
+  const isMainLoading = isDashboardLoading;
 
   return (
-    <div>
-      {/* Welcome Section */}
-      <div className="mb-8">
-        <h2 className="text-3xl font-bold">Dashboard</h2>
-        <p className="text-muted-foreground">
-          Welcome back to {dashboardData.school.name}! Here's what's happening today.
-        </p>
+    <div className="space-y-8">
+      {/* Welcome Section with Gradient */}
+      <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 p-8 text-white shadow-lg">
+        <div className="relative z-10">
+          <div className="flex items-center gap-4">
+            <div className="rounded-full bg-white/20 p-4 backdrop-blur-sm">
+              <School className="h-8 w-8" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold">
+                {isMainLoading ? (
+                  <Skeleton className="h-9 w-64 bg-white/20" />
+                ) : (
+                  `Dashboard ${dashboardData?.school?.name ?? ""}`
+                )}
+              </h2>
+              <p className="mt-1 text-blue-100">
+                {isMainLoading ? (
+                  <Skeleton className="h-5 w-96 bg-white/20" />
+                ) : (
+                  `Selamat datang kembali! Berikut ringkasan aktivitas hari ini.`
+                )}
+              </p>
+            </div>
+          </div>
+        </div>
+        {/* Decorative background */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute -right-12 -top-12 h-48 w-48 rounded-full bg-white"></div>
+          <div className="absolute -bottom-8 -left-8 h-32 w-32 rounded-full bg-white"></div>
+        </div>
       </div>
 
       {/* Quick Actions */}
-      <Card className="mb-8 border-primary/20 bg-gradient-to-r from-primary/5 to-primary/10">
+      <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10">
         <CardContent className="pt-6">
-          <h3 className="mb-4 text-lg font-semibold">Quick Actions</h3>
+          <div className="mb-6 flex items-center gap-2">
+            <div className="rounded-full bg-primary/10 p-2">
+              <FileText className="h-5 w-5 text-primary" />
+            </div>
+            <h3 className="text-lg font-semibold">Aksi Cepat</h3>
+          </div>
           <div className="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-6">
             <Link
               href="/dashboard/students"
-              className="flex flex-col items-center rounded-lg bg-white p-4 shadow-sm transition hover:shadow-md"
+              className="group flex flex-col items-center rounded-xl bg-white p-5 shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg"
             >
-              <div className="mb-2 text-2xl">👨‍🎓</div>
+              <div className="mb-3 rounded-full bg-blue-100 p-3 transition-colors group-hover:bg-blue-200">
+                <GraduationCap className="h-6 w-6 text-blue-600" />
+              </div>
               <span className="text-center text-sm font-medium">Data Siswa</span>
             </Link>
             <Link
               href="/dashboard/teachers"
-              className="flex flex-col items-center rounded-lg bg-white p-4 shadow-sm transition hover:shadow-md"
+              className="group flex flex-col items-center rounded-xl bg-white p-5 shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg"
             >
-              <div className="mb-2 text-2xl">👨‍🏫</div>
+              <div className="mb-3 rounded-full bg-green-100 p-3 transition-colors group-hover:bg-green-200">
+                <Users className="h-6 w-6 text-green-600" />
+              </div>
               <span className="text-center text-sm font-medium">Data Guru</span>
             </Link>
             <Link
               href="/dashboard/attendance/manual"
-              className="flex flex-col items-center rounded-lg bg-white p-4 shadow-sm transition hover:shadow-md"
+              className="group flex flex-col items-center rounded-xl bg-white p-5 shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg"
             >
-              <div className="mb-2 text-2xl">✅</div>
+              <div className="mb-3 rounded-full bg-purple-100 p-3 transition-colors group-hover:bg-purple-200">
+                <UserCheck className="h-6 w-6 text-purple-600" />
+              </div>
               <span className="text-center text-sm font-medium">Absensi</span>
             </Link>
             <Link
               href="/dashboard/exams"
-              className="flex flex-col items-center rounded-lg bg-white p-4 shadow-sm transition hover:shadow-md"
+              className="group flex flex-col items-center rounded-xl bg-white p-5 shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg"
             >
-              <div className="mb-2 text-2xl">📝</div>
+              <div className="mb-3 rounded-full bg-orange-100 p-3 transition-colors group-hover:bg-orange-200">
+                <FileText className="h-6 w-6 text-orange-600" />
+              </div>
               <span className="text-center text-sm font-medium">Ujian</span>
             </Link>
             <Link
               href="/dashboard/finance/tuition"
-              className="flex flex-col items-center rounded-lg bg-white p-4 shadow-sm transition hover:shadow-md"
+              className="group flex flex-col items-center rounded-xl bg-white p-5 shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg"
             >
-              <div className="mb-2 text-2xl">💰</div>
+              <div className="mb-3 rounded-full bg-emerald-100 p-3 transition-colors group-hover:bg-emerald-200">
+                <DollarSign className="h-6 w-6 text-emerald-600" />
+              </div>
               <span className="text-center text-sm font-medium">Keuangan</span>
             </Link>
             <Link
               href="/dashboard/agenda"
-              className="flex flex-col items-center rounded-lg bg-white p-4 shadow-sm transition hover:shadow-md"
+              className="group flex flex-col items-center rounded-xl bg-white p-5 shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg"
             >
-              <div className="mb-2 text-2xl">📅</div>
+              <div className="mb-3 rounded-full bg-indigo-100 p-3 transition-colors group-hover:bg-indigo-200">
+                <CalendarDays className="h-6 w-6 text-indigo-600" />
+              </div>
               <span className="text-center text-sm font-medium">Agenda</span>
             </Link>
           </div>
         </CardContent>
       </Card>
 
-      {/* Main Stats Cards - 8 Cards */}
-      <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-        {/* Teachers */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Guru</CardTitle>
-            <div className="text-2xl">👨‍🏫</div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{dashboardData.stats.teachers}</div>
-            <p className="text-xs text-muted-foreground">Active teachers</p>
-          </CardContent>
-        </Card>
+      {/* Main Stats Cards - 8 Cards with Loading States */}
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+        {isMainLoading ? (
+          <>
+            {Array.from({ length: 8 }).map((_, i) => (
+              <StatCardSkeleton key={i} />
+            ))}
+          </>
+        ) : (
+          <>
+            {/* Teachers */}
+            <Card className="overflow-hidden border-l-4 border-l-green-500 transition-all hover:shadow-lg">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Total Guru</p>
+                    <p className="mt-2 text-3xl font-bold">{dashboardData?.stats.teachers ?? 0}</p>
+                    <p className="mt-1 text-xs text-muted-foreground">Guru aktif</p>
+                  </div>
+                  <div className="rounded-full bg-green-100 p-4">
+                    <Users className="h-7 w-7 text-green-600" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
-        {/* Students */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Siswa</CardTitle>
-            <div className="text-2xl">👨‍🎓</div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{dashboardData.stats.students}</div>
-            <p className="text-xs text-muted-foreground">Enrolled students</p>
-          </CardContent>
-        </Card>
+            {/* Students */}
+            <Card className="overflow-hidden border-l-4 border-l-blue-500 transition-all hover:shadow-lg">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Total Siswa</p>
+                    <p className="mt-2 text-3xl font-bold">{dashboardData?.stats.students ?? 0}</p>
+                    <p className="mt-1 text-xs text-muted-foreground">Siswa aktif</p>
+                  </div>
+                  <div className="rounded-full bg-blue-100 p-4">
+                    <GraduationCap className="h-7 w-7 text-blue-600" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
-        {/* Classes */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Kelas</CardTitle>
-            <div className="text-2xl">🏫</div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{dashboardData.stats.classes}</div>
-            <p className="text-xs text-muted-foreground">Active classes</p>
-          </CardContent>
-        </Card>
+            {/* Classes */}
+            <Card className="overflow-hidden border-l-4 border-l-purple-500 transition-all hover:shadow-lg">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Total Kelas</p>
+                    <p className="mt-2 text-3xl font-bold">{dashboardData?.stats.classes ?? 0}</p>
+                    <p className="mt-1 text-xs text-muted-foreground">Kelas aktif</p>
+                  </div>
+                  <div className="rounded-full bg-purple-100 p-4">
+                    <School className="h-7 w-7 text-purple-600" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
-        {/* Attendance Today */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Absensi Hari Ini</CardTitle>
-            <div className="text-2xl">📊</div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{dashboardData.attendanceRate}%</div>
-            <p className="text-xs text-muted-foreground">
-              {dashboardData.stats.attendanceToday} records
-            </p>
-          </CardContent>
-        </Card>
+            {/* Attendance Today */}
+            <Card className="overflow-hidden border-l-4 border-l-orange-500 transition-all hover:shadow-lg">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Absensi Hari Ini</p>
+                    <p className="mt-2 text-3xl font-bold">{dashboardData?.attendanceRate ?? 0}%</p>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {dashboardData?.stats.attendanceToday ?? 0} catatan
+                    </p>
+                  </div>
+                  <div className="rounded-full bg-orange-100 p-4">
+                    <BarChart3 className="h-7 w-7 text-orange-600" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
-        {/* Alumni */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Alumni</CardTitle>
-            <div className="text-2xl">🎓</div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{comprehensiveStats?.alumni ?? 0}</div>
-            <p className="text-xs text-muted-foreground">Total graduates</p>
-          </CardContent>
-        </Card>
+            {/* Alumni */}
+            <Card className="overflow-hidden border-l-4 border-l-indigo-500 transition-all hover:shadow-lg">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Alumni</p>
+                    <p className="mt-2 text-3xl font-bold">
+                      {isComprehensiveLoading ? (
+                        <Skeleton className="h-9 w-16" />
+                      ) : (
+                        comprehensiveStats?.alumni ?? 0
+                      )}
+                    </p>
+                    <p className="mt-1 text-xs text-muted-foreground">Total lulusan</p>
+                  </div>
+                  <div className="rounded-full bg-indigo-100 p-4">
+                    <GraduationCap className="h-7 w-7 text-indigo-600" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
-        {/* Parents */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Wali Murid</CardTitle>
-            <div className="text-2xl">👨‍👩‍👧</div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{comprehensiveStats?.parents ?? 0}</div>
-            <p className="text-xs text-muted-foreground">Registered parents</p>
-          </CardContent>
-        </Card>
+            {/* Parents */}
+            <Card className="overflow-hidden border-l-4 border-l-teal-500 transition-all hover:shadow-lg">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Wali Murid</p>
+                    <p className="mt-2 text-3xl font-bold">
+                      {isComprehensiveLoading ? (
+                        <Skeleton className="h-9 w-16" />
+                      ) : (
+                        comprehensiveStats?.parents ?? 0
+                      )}
+                    </p>
+                    <p className="mt-1 text-xs text-muted-foreground">Orang tua terdaftar</p>
+                  </div>
+                  <div className="rounded-full bg-teal-100 p-4">
+                    <UsersRound className="h-7 w-7 text-teal-600" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
-        {/* Subjects */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Mata Pelajaran</CardTitle>
-            <div className="text-2xl">📚</div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{comprehensiveStats?.subjects ?? 0}</div>
-            <p className="text-xs text-muted-foreground">Active subjects</p>
-          </CardContent>
-        </Card>
+            {/* Subjects */}
+            <Card className="overflow-hidden border-l-4 border-l-pink-500 transition-all hover:shadow-lg">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Mata Pelajaran</p>
+                    <p className="mt-2 text-3xl font-bold">
+                      {isComprehensiveLoading ? (
+                        <Skeleton className="h-9 w-16" />
+                      ) : (
+                        comprehensiveStats?.subjects ?? 0
+                      )}
+                    </p>
+                    <p className="mt-1 text-xs text-muted-foreground">Mapel aktif</p>
+                  </div>
+                  <div className="rounded-full bg-pink-100 p-4">
+                    <BookOpen className="h-7 w-7 text-pink-600" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
-        {/* Exam Average */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Rata-rata Nilai</CardTitle>
-            <div className="text-2xl">📈</div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {comprehensiveStats?.examResults.avgScore ?? 0}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              {comprehensiveStats?.examResults.totalResults ?? 0} exam results
-            </p>
-          </CardContent>
-        </Card>
+            {/* Exam Average */}
+            <Card className="overflow-hidden border-l-4 border-l-emerald-500 transition-all hover:shadow-lg">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Rata-rata Nilai</p>
+                    <p className="mt-2 text-3xl font-bold">
+                      {isComprehensiveLoading ? (
+                        <Skeleton className="h-9 w-16" />
+                      ) : (
+                        comprehensiveStats?.examResults.avgScore ?? 0
+                      )}
+                    </p>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {comprehensiveStats?.examResults.totalResults ?? 0} hasil ujian
+                    </p>
+                  </div>
+                  <div className="rounded-full bg-emerald-100 p-4">
+                    <TrendingUp className="h-7 w-7 text-emerald-600" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </>
+        )}
       </div>
 
       {/* Finance Summary */}
-      {comprehensiveStats?.financeStats && (
-        <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-3">
-          <Card className="border-green-200 bg-green-50">
-            <CardHeader>
-              <CardTitle className="text-sm font-medium text-green-900">
-                Total Pendapatan
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-green-700">
-                {formatCurrency(comprehensiveStats.financeStats.paidAmount)}
-              </div>
-              <p className="text-xs text-green-600">From paid bills</p>
-            </CardContent>
-          </Card>
-
-          <Card className="border-orange-200 bg-orange-50">
-            <CardHeader>
-              <CardTitle className="text-sm font-medium text-orange-900">
-                Belum Dibayar
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-orange-700">
-                {formatCurrency(comprehensiveStats.financeStats.unpaidAmount)}
-              </div>
-              <p className="text-xs text-orange-600">Outstanding bills</p>
-            </CardContent>
-          </Card>
-
-          <Card className="border-blue-200 bg-blue-50">
-            <CardHeader>
-              <CardTitle className="text-sm font-medium text-blue-900">Total Tagihan</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-blue-700">
-                {comprehensiveStats.financeStats.totalBills}
-              </div>
-              <p className="text-xs text-blue-600">All time bills</p>
-            </CardContent>
-          </Card>
+      {isComprehensiveLoading ? (
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <Card key={i}>
+              <CardContent className="p-6">
+                <Skeleton className="mb-4 h-6 w-32" />
+                <Skeleton className="mb-2 h-8 w-48" />
+                <Skeleton className="h-4 w-24" />
+              </CardContent>
+            </Card>
+          ))}
         </div>
+      ) : (
+        comprehensiveStats?.financeStats && (
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+            <Card className="overflow-hidden border-l-4 border-l-green-500 bg-gradient-to-br from-green-50 to-white">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <div className="rounded-full bg-green-100 p-2">
+                        <CheckCircle2 className="h-5 w-5 text-green-600" />
+                      </div>
+                      <p className="text-sm font-medium text-green-900">Total Pendapatan</p>
+                    </div>
+                    <p className="mt-3 text-2xl font-bold text-green-700">
+                      {formatCurrency(comprehensiveStats.financeStats.paidAmount)}
+                    </p>
+                    <p className="mt-1 text-xs text-green-600">Dari tagihan terbayar</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="overflow-hidden border-l-4 border-l-orange-500 bg-gradient-to-br from-orange-50 to-white">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <div className="rounded-full bg-orange-100 p-2">
+                        <Clock className="h-5 w-5 text-orange-600" />
+                      </div>
+                      <p className="text-sm font-medium text-orange-900">Belum Dibayar</p>
+                    </div>
+                    <p className="mt-3 text-2xl font-bold text-orange-700">
+                      {formatCurrency(comprehensiveStats.financeStats.unpaidAmount)}
+                    </p>
+                    <p className="mt-1 text-xs text-orange-600">Tagihan outstanding</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="overflow-hidden border-l-4 border-l-blue-500 bg-gradient-to-br from-blue-50 to-white">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <div className="rounded-full bg-blue-100 p-2">
+                        <FileText className="h-5 w-5 text-blue-600" />
+                      </div>
+                      <p className="text-sm font-medium text-blue-900">Total Tagihan</p>
+                    </div>
+                    <p className="mt-3 text-2xl font-bold text-blue-700">
+                      {comprehensiveStats.financeStats.totalBills}
+                    </p>
+                    <p className="mt-1 text-xs text-blue-600">Semua tagihan</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )
       )}
 
       {/* Three Column Layout */}
-      <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Attendance Summary */}
         <Card>
           <CardHeader>
-            <CardTitle>Ringkasan Absensi Hari Ini</CardTitle>
+            <div className="flex items-center gap-2">
+              <div className="rounded-full bg-blue-100 p-2">
+                <UserCheck className="h-5 w-5 text-blue-600" />
+              </div>
+              <CardTitle className="text-base">Ringkasan Absensi Hari Ini</CardTitle>
+            </div>
           </CardHeader>
           <CardContent>
-            {attendanceSummary && attendanceSummary.length > 0 ? (
-              <div className="space-y-4">
-                {attendanceSummary.map((item) => (
-                  <div key={item.status} className="flex items-center justify-between">
-                    <span className="flex items-center text-sm font-medium">
-                      <span className="mr-2">
-                        {item.status === "PRESENT" && "✅"}
-                        {item.status === "ABSENT" && "❌"}
-                        {item.status === "LATE" && "⏰"}
-                        {item.status === "SICK" && "🤒"}
-                        {item.status === "PERMISSION" && "📝"}
-                        {item.status === "EXCUSED" && "📋"}
-                      </span>
-                      {item.status === "PRESENT" && "Hadir"}
-                      {item.status === "ABSENT" && "Tidak Hadir"}
-                      {item.status === "LATE" && "Terlambat"}
-                      {item.status === "SICK" && "Sakit"}
-                      {item.status === "PERMISSION" && "Izin"}
-                      {item.status === "EXCUSED" && "Alfa"}
-                    </span>
-                    <span className="text-2xl font-bold">{item.count}</span>
+            {isAttendanceLoading ? (
+              <div className="space-y-3">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} className="flex items-center justify-between">
+                    <Skeleton className="h-5 w-24" />
+                    <Skeleton className="h-7 w-12" />
                   </div>
                 ))}
               </div>
+            ) : attendanceSummary && attendanceSummary.length > 0 ? (
+              <div className="space-y-3">
+                {attendanceSummary.map((item) => {
+                  const getStatusIcon = () => {
+                    switch (item.status) {
+                      case "PRESENT":
+                        return <CheckCircle2 className="h-5 w-5 text-green-600" />;
+                      case "ABSENT":
+                        return <AlertCircle className="h-5 w-5 text-red-600" />;
+                      case "LATE":
+                        return <Clock className="h-5 w-5 text-yellow-600" />;
+                      case "SICK":
+                        return <AlertTriangle className="h-5 w-5 text-orange-600" />;
+                      case "PERMISSION":
+                        return <FileText className="h-5 w-5 text-blue-600" />;
+                      case "EXCUSED":
+                        return <AlertCircle className="h-5 w-5 text-gray-600" />;
+                      default:
+                        return null;
+                    }
+                  };
+
+                  const getStatusLabel = () => {
+                    switch (item.status) {
+                      case "PRESENT":
+                        return "Hadir";
+                      case "ABSENT":
+                        return "Tidak Hadir";
+                      case "LATE":
+                        return "Terlambat";
+                      case "SICK":
+                        return "Sakit";
+                      case "PERMISSION":
+                        return "Izin";
+                      case "EXCUSED":
+                        return "Alfa";
+                      default:
+                        return item.status;
+                    }
+                  };
+
+                  return (
+                    <div key={item.status} className="flex items-center justify-between rounded-lg border p-3 transition-colors hover:bg-gray-50">
+                      <span className="flex items-center gap-3 text-sm font-medium">
+                        {getStatusIcon()}
+                        {getStatusLabel()}
+                      </span>
+                      <span className="text-2xl font-bold">{item.count}</span>
+                    </div>
+                  );
+                })}
+              </div>
             ) : (
-              <p className="text-center text-sm text-muted-foreground">
-                No attendance records for today
+              <p className="py-8 text-center text-sm text-muted-foreground">
+                Belum ada catatan absensi hari ini
               </p>
             )}
           </CardContent>
@@ -289,30 +498,57 @@ export default function DashboardPage() {
         {/* Upcoming Exams */}
         <Card>
           <CardHeader>
-            <CardTitle>Ujian Mendatang</CardTitle>
+            <div className="flex items-center gap-2">
+              <div className="rounded-full bg-purple-100 p-2">
+                <FileText className="h-5 w-5 text-purple-600" />
+              </div>
+              <CardTitle className="text-base">Ujian Mendatang</CardTitle>
+            </div>
           </CardHeader>
           <CardContent>
-            {comprehensiveStats?.upcomingExams &&
-            comprehensiveStats.upcomingExams.length > 0 ? (
+            {isComprehensiveLoading ? (
+              <div className="space-y-3">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <div key={i} className="space-y-2">
+                    <Skeleton className="h-5 w-full" />
+                    <Skeleton className="h-4 w-3/4" />
+                    <Skeleton className="h-3 w-1/2" />
+                  </div>
+                ))}
+              </div>
+            ) : comprehensiveStats?.upcomingExams && comprehensiveStats.upcomingExams.length > 0 ? (
               <div className="space-y-3">
                 {comprehensiveStats.upcomingExams.map((exam) => (
-                  <div key={exam.id} className="border-b pb-3 last:border-0">
-                    <p className="font-medium">{exam.title}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {exam.subject.name} • {exam.class.name} {exam.class.section}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {new Date(exam.startDate).toLocaleDateString("id-ID", {
-                        day: "numeric",
-                        month: "short",
-                        year: "numeric",
-                      })}
-                    </p>
+                  <div
+                    key={exam.id}
+                    className="rounded-lg border p-3 transition-colors hover:bg-gray-50"
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className="rounded-full bg-purple-100 p-2">
+                        <Calendar className="h-4 w-4 text-purple-600" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-medium">{exam.title}</p>
+                        <p className="mt-1 text-sm text-muted-foreground">
+                          {exam.subject.name} • {exam.class.name} {exam.class.section}
+                        </p>
+                        <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
+                          <Calendar className="h-3 w-3" />
+                          {new Date(exam.startDate).toLocaleDateString("id-ID", {
+                            day: "numeric",
+                            month: "short",
+                            year: "numeric",
+                          })}
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-center text-sm text-muted-foreground">No upcoming exams</p>
+              <p className="py-8 text-center text-sm text-muted-foreground">
+                Tidak ada ujian mendatang
+              </p>
             )}
           </CardContent>
         </Card>
@@ -320,59 +556,107 @@ export default function DashboardPage() {
         {/* Recent Students */}
         <Card>
           <CardHeader>
-            <CardTitle>Siswa Terbaru</CardTitle>
+            <div className="flex items-center gap-2">
+              <div className="rounded-full bg-indigo-100 p-2">
+                <GraduationCap className="h-5 w-5 text-indigo-600" />
+              </div>
+              <CardTitle className="text-base">Siswa Terbaru</CardTitle>
+            </div>
           </CardHeader>
           <CardContent>
-            {recentStudents && recentStudents.length > 0 ? (
+            {isStudentsLoading ? (
+              <div className="space-y-3">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <div key={i} className="space-y-2">
+                    <Skeleton className="h-5 w-full" />
+                    <Skeleton className="h-4 w-2/3" />
+                  </div>
+                ))}
+              </div>
+            ) : recentStudents && recentStudents.length > 0 ? (
               <div className="space-y-3">
                 {recentStudents.map((student) => (
-                  <div key={student.id} className="border-b pb-3 last:border-0">
-                    <p className="font-medium">{student.user.name}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {student.currentClass?.name || "No class"} • {student.nis}
-                    </p>
+                  <div
+                    key={student.id}
+                    className="rounded-lg border p-3 transition-colors hover:bg-gray-50"
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className="rounded-full bg-indigo-100 p-2">
+                        <GraduationCap className="h-4 w-4 text-indigo-600" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-medium">{student.user.name}</p>
+                        <p className="mt-1 text-sm text-muted-foreground">
+                          {student.currentClass?.name || "Belum ada kelas"} • {student.nis}
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-center text-sm text-muted-foreground">No recent students</p>
+              <p className="py-8 text-center text-sm text-muted-foreground">
+                Belum ada siswa terbaru
+              </p>
             )}
           </CardContent>
         </Card>
       </div>
 
       {/* Two Column Layout */}
-      <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* Information Board */}
         <Card>
           <CardHeader>
-            <CardTitle>📢 Informasi & Pengumuman</CardTitle>
+            <div className="flex items-center gap-2">
+              <div className="rounded-full bg-orange-100 p-2">
+                <Bell className="h-5 w-5 text-orange-600" />
+              </div>
+              <CardTitle className="text-base">Informasi & Pengumuman</CardTitle>
+            </div>
           </CardHeader>
           <CardContent>
-            {comprehensiveStats?.recentInformation &&
-            comprehensiveStats.recentInformation.length > 0 ? (
+            {isComprehensiveLoading ? (
+              <div className="space-y-4">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <div key={i} className="space-y-2">
+                    <Skeleton className="h-5 w-full" />
+                    <Skeleton className="h-4 w-4/5" />
+                    <Skeleton className="h-3 w-1/3" />
+                  </div>
+                ))}
+              </div>
+            ) : comprehensiveStats?.recentInformation && comprehensiveStats.recentInformation.length > 0 ? (
               <div className="space-y-4">
                 {comprehensiveStats.recentInformation.map((info) => (
-                  <div key={info.id} className="border-b pb-4 last:border-0">
-                    <h4 className="font-medium">{info.title}</h4>
-                    <p className="mt-1 text-sm text-muted-foreground line-clamp-2">
-                      {info.content}
-                    </p>
-                    <p className="mt-2 text-xs text-muted-foreground">
-                      {info.publishedAt
-                        ? new Date(info.publishedAt).toLocaleDateString("id-ID", {
-                            day: "numeric",
-                            month: "short",
-                            year: "numeric",
-                          })
-                        : "Not published"}
-                    </p>
+                  <div key={info.id} className="rounded-lg border p-4 transition-colors hover:bg-gray-50">
+                    <div className="flex items-start gap-3">
+                      <div className="rounded-full bg-orange-100 p-2">
+                        <Bell className="h-4 w-4 text-orange-600" />
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-medium">{info.title}</h4>
+                        <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
+                          {info.content}
+                        </p>
+                        <p className="mt-2 flex items-center gap-1 text-xs text-muted-foreground">
+                          <Calendar className="h-3 w-3" />
+                          {info.publishedAt
+                            ? new Date(info.publishedAt).toLocaleDateString("id-ID", {
+                                day: "numeric",
+                                month: "short",
+                                year: "numeric",
+                              })
+                            : "Belum dipublikasi"}
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-center text-sm text-muted-foreground">
-                No information available
+              <p className="py-8 text-center text-sm text-muted-foreground">
+                Tidak ada informasi tersedia
               </p>
             )}
           </CardContent>
@@ -381,70 +665,106 @@ export default function DashboardPage() {
         {/* Upcoming Holidays */}
         <Card>
           <CardHeader>
-            <CardTitle>🏖️ Hari Libur Mendatang</CardTitle>
+            <div className="flex items-center gap-2">
+              <div className="rounded-full bg-teal-100 p-2">
+                <Palmtree className="h-5 w-5 text-teal-600" />
+              </div>
+              <CardTitle className="text-base">Hari Libur Mendatang</CardTitle>
+            </div>
           </CardHeader>
           <CardContent>
-            {comprehensiveStats?.upcomingHolidays &&
-            comprehensiveStats.upcomingHolidays.length > 0 ? (
+            {isComprehensiveLoading ? (
+              <div className="space-y-4">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <div key={i} className="space-y-2">
+                    <Skeleton className="h-5 w-full" />
+                    <Skeleton className="h-4 w-3/4" />
+                  </div>
+                ))}
+              </div>
+            ) : comprehensiveStats?.upcomingHolidays && comprehensiveStats.upcomingHolidays.length > 0 ? (
               <div className="space-y-4">
                 {comprehensiveStats.upcomingHolidays.map((holiday) => (
-                  <div key={holiday.id} className="flex items-start justify-between border-b pb-4 last:border-0">
-                    <div>
-                      <h4 className="font-medium">{holiday.name}</h4>
-                      {holiday.description && (
-                        <p className="mt-1 text-sm text-muted-foreground">{holiday.description}</p>
-                      )}
-                    </div>
-                    <div className="flex flex-col items-end">
-                      <p className="text-sm font-medium">
+                  <div key={holiday.id} className="rounded-lg border p-4 transition-colors hover:bg-gray-50">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex items-start gap-3">
+                        <div className="rounded-full bg-teal-100 p-2">
+                          <Palmtree className="h-4 w-4 text-teal-600" />
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="font-medium">{holiday.name}</h4>
+                          {holiday.description && (
+                            <p className="mt-1 text-sm text-muted-foreground">{holiday.description}</p>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1 rounded-lg bg-teal-50 px-3 py-1 text-sm font-medium text-teal-700">
+                        <Calendar className="h-3 w-3" />
                         {new Date(holiday.date).toLocaleDateString("id-ID", {
                           day: "numeric",
                           month: "short",
                         })}
-                      </p>
+                      </div>
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-center text-sm text-muted-foreground">No upcoming holidays</p>
+              <p className="py-8 text-center text-sm text-muted-foreground">
+                Tidak ada libur mendatang
+              </p>
             )}
           </CardContent>
         </Card>
       </div>
 
       {/* Upcoming Agenda */}
-      {dashboardData.upcomingAgenda && dashboardData.upcomingAgenda.length > 0 && (
-        <Card className="mb-8">
+      {!isMainLoading && dashboardData?.upcomingAgenda && dashboardData.upcomingAgenda.length > 0 && (
+        <Card>
           <CardHeader>
-            <CardTitle>📅 Agenda Sekolah</CardTitle>
+            <div className="flex items-center gap-2">
+              <div className="rounded-full bg-indigo-100 p-2">
+                <CalendarDays className="h-5 w-5 text-indigo-600" />
+              </div>
+              <CardTitle className="text-base">Agenda Sekolah</CardTitle>
+            </div>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               {dashboardData.upcomingAgenda.map((agenda) => (
                 <div
                   key={agenda.id}
-                  className="flex items-start space-x-4 border-b pb-3 last:border-0"
+                  className="rounded-lg border p-4 transition-colors hover:bg-gray-50"
                 >
-                  <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                    <div className="text-2xl">🗓️</div>
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="font-medium">{agenda.title}</h4>
-                    <p className="text-sm text-muted-foreground">
-                      {new Date(agenda.startDate).toLocaleDateString("id-ID", {
-                        day: "numeric",
-                        month: "long",
-                        year: "numeric",
-                      })}
-                      {agenda.endDate &&
-                        ` - ${new Date(agenda.endDate).toLocaleDateString("id-ID", {
-                          day: "numeric",
-                          month: "long",
-                          year: "numeric",
-                        })}`}
-                      {agenda.location && ` • ${agenda.location}`}
-                    </p>
+                  <div className="flex items-start gap-4">
+                    <div className="rounded-lg bg-indigo-100 p-3">
+                      <CalendarDays className="h-6 w-6 text-indigo-600" />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-medium">{agenda.title}</h4>
+                      <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
+                        <span className="flex items-center gap-1">
+                          <Calendar className="h-3 w-3" />
+                          {new Date(agenda.startDate).toLocaleDateString("id-ID", {
+                            day: "numeric",
+                            month: "long",
+                            year: "numeric",
+                          })}
+                          {agenda.endDate &&
+                            ` - ${new Date(agenda.endDate).toLocaleDateString("id-ID", {
+                              day: "numeric",
+                              month: "long",
+                              year: "numeric",
+                            })}`}
+                        </span>
+                        {agenda.location && (
+                          <span className="flex items-center gap-1">
+                            <MapPin className="h-3 w-3" />
+                            {agenda.location}
+                          </span>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -454,18 +774,18 @@ export default function DashboardPage() {
       )}
 
       {/* Financial Alert */}
-      {dashboardData.unpaidBills > 0 && (
-        <Card className="border-orange-200 bg-orange-50">
-          <CardContent className="pt-6">
-            <div className="flex items-center space-x-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-orange-100 text-orange-600">
-                <div className="text-2xl">⚠️</div>
+      {!isMainLoading && dashboardData?.unpaidBills && dashboardData.unpaidBills > 0 && (
+        <Card className="overflow-hidden border-l-4 border-l-orange-500 bg-gradient-to-br from-orange-50 to-white">
+          <CardContent className="p-6">
+            <div className="flex items-start gap-4">
+              <div className="rounded-full bg-orange-100 p-3">
+                <AlertTriangle className="h-6 w-6 text-orange-600" />
               </div>
-              <div>
-                <h4 className="font-medium text-orange-900">Tagihan Belum Dibayar</h4>
-                <p className="text-sm text-orange-700">
-                  Ada {dashboardData.unpaidBills} tagihan yang belum dibayar. Segera lakukan
-                  pembayaran!
+              <div className="flex-1">
+                <h4 className="font-semibold text-orange-900">Tagihan Belum Dibayar</h4>
+                <p className="mt-1 text-sm text-orange-700">
+                  Ada <span className="font-semibold">{dashboardData.unpaidBills} tagihan</span> yang
+                  belum dibayar. Segera lakukan pembayaran!
                 </p>
               </div>
             </div>
