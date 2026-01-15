@@ -68,7 +68,7 @@ export default function TeacherAttendancePage() {
     dateTo: dateTo ? new Date(dateTo) : undefined,
   });
 
-  const { data: teachers } = api.teacher.getAll.useQuery();
+  const { data: teachers } = api.teacher.getAll.useQuery({});
 
   // Manual override mutation
   const overrideMutation = api.teacherAttendance.manualOverride.useMutation({

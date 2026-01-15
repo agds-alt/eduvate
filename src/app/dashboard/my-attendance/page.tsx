@@ -154,7 +154,7 @@ export default function MyAttendancePage() {
 
     const [hours, minutes] = plannedCheckOutTime.split(":");
     const plannedTime = new Date();
-    plannedTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+    plannedTime.setHours(parseInt(hours || "0"), parseInt(minutes || "0"), 0, 0);
 
     earlyDepartureMutation.mutate({
       teacherId,
@@ -220,7 +220,7 @@ export default function MyAttendancePage() {
                   </div>
                   <p className="mt-2 text-sm text-green-600">
                     Waktu:{" "}
-                    {format(new Date(todayAttendance.checkInTime), "HH:mm:ss")}
+                    {todayAttendance.checkInTime && format(new Date(todayAttendance.checkInTime), "HH:mm:ss")}
                   </p>
                   {todayAttendance.isLate && (
                     <p className="mt-1 text-sm text-red-600">
@@ -287,7 +287,7 @@ export default function MyAttendancePage() {
                   </div>
                   <p className="mt-2 text-sm text-green-600">
                     Waktu:{" "}
-                    {format(new Date(todayAttendance.checkOutTime), "HH:mm:ss")}
+                    {todayAttendance.checkOutTime && format(new Date(todayAttendance.checkOutTime), "HH:mm:ss")}
                   </p>
                   {todayAttendance.isEarlyDeparture && (
                     <p className="mt-1 text-sm text-orange-600">

@@ -112,12 +112,12 @@ export default function AttendanceApprovalsPage() {
     };
 
     const config = statusMap[status] || statusMap.PENDING;
-    const Icon = config.icon;
+    const Icon = config?.icon;
 
     return (
-      <Badge variant={config.variant} className="flex items-center gap-1">
-        <Icon className="h-3 w-3" />
-        {config.label}
+      <Badge variant={config?.variant} className="flex items-center gap-1">
+        {Icon && <Icon className="h-3 w-3" />}
+        {config?.label}
       </Badge>
     );
   };

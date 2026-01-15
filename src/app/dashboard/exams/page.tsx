@@ -22,9 +22,9 @@ export default function ExamsPage() {
   const utils = api.useUtils();
   const { data: stats, isLoading: statsLoading } = api.exam.getStats.useQuery();
   const { data: exams, isLoading: examsLoading } = api.exam.getAll.useQuery({});
-  const { data: classes } = api.class.getAll.useQuery();
-  const { data: subjects } = api.subject.getAll.useQuery();
-  const { data: teachers } = api.teacher.getAll.useQuery();
+  const { data: classes } = api.class.getAll.useQuery({});
+  const { data: subjects } = api.subject.getAll.useQuery({});
+  const { data: teachers } = api.teacher.getAll.useQuery({});
 
   // Create mutation
   const createExam = api.exam.create.useMutation({
@@ -305,7 +305,7 @@ export default function ExamsPage() {
                         className="w-full rounded-lg border border-gray-300 px-4 py-2"
                       >
                         <option value="">Pilih Kelas</option>
-                        {classes?.map((cls) => (
+                        {classes?.classes?.map((cls: any) => (
                           <option key={cls.id} value={cls.id}>
                             {cls.name} {cls.section}
                           </option>
@@ -325,7 +325,7 @@ export default function ExamsPage() {
                         className="w-full rounded-lg border border-gray-300 px-4 py-2"
                       >
                         <option value="">Pilih Mata Pelajaran</option>
-                        {subjects?.map((subject) => (
+                        {subjects?.subjects?.map((subject: any) => (
                           <option key={subject.id} value={subject.id}>
                             {subject.name}
                           </option>
@@ -346,7 +346,7 @@ export default function ExamsPage() {
                       className="w-full rounded-lg border border-gray-300 px-4 py-2"
                     >
                       <option value="">Pilih Guru Pengawas</option>
-                      {teachers?.map((teacher) => (
+                      {teachers?.teachers?.map((teacher: any) => (
                         <option key={teacher.id} value={teacher.id}>
                           {teacher.user.name}
                         </option>

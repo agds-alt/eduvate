@@ -24,8 +24,8 @@ export default function ExamResultsPage() {
     classId: selectedClass || undefined,
   });
   const { data: exams } = api.exam.getAll.useQuery({});
-  const { data: classes } = api.class.getAll.useQuery();
-  const { data: students } = api.student.getAll.useQuery();
+  const { data: classes } = api.class.getAll.useQuery({});
+  const { data: students } = api.student.getAll.useQuery({});
 
   // Create mutation
   const createResult = api.examResult.create.useMutation({
@@ -110,7 +110,7 @@ export default function ExamResultsPage() {
                 className="w-full rounded-lg border border-gray-300 px-4 py-2"
               >
                 <option value="">Semua Kelas</option>
-                {classes?.map((cls) => (
+                {classes?.classes?.map((cls: any) => (
                   <option key={cls.id} value={cls.id}>
                     {cls.name} {cls.section}
                   </option>
@@ -300,7 +300,7 @@ export default function ExamResultsPage() {
                       className="w-full rounded-lg border border-gray-300 px-4 py-2"
                     >
                       <option value="">Pilih Siswa</option>
-                      {students?.map((student) => (
+                      {students?.students?.map((student: any) => (
                         <option key={student.id} value={student.id}>
                           {student.user.name} - {student.nis}
                         </option>

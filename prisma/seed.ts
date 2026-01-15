@@ -86,7 +86,7 @@ async function main() {
       },
     });
 
-    const teacher = await prisma.teacher.create({
+    const teacher: any = await prisma.teacher.create({
       data: {
         userId: user.id,
         schoolId: school.id,
