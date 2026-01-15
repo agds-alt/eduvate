@@ -12,7 +12,7 @@ import {
 } from "~/components/ui/dropdown-menu";
 import { LogOut, User, Settings } from "lucide-react";
 
-export function UserMenu() {
+export function UserMenu({ collapsed = false }: { collapsed?: boolean }) {
   const { data: session } = useSession();
 
   if (!session?.user) {
@@ -36,17 +36,24 @@ export function UserMenu() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button className="flex w-full items-center gap-3 rounded-lg p-2 hover:bg-gray-100 transition-colors">
+        <button
+          className={`flex w-full items-center gap-3 rounded-lg p-2 hover:bg-gray-100 transition-colors ${
+            collapsed ? "justify-center" : ""
+          }`}
+          title={collapsed ? session.user.name ?? undefined : undefined}
+        >
           <Avatar className="h-10 w-10">
             <AvatarImage src={session.user.image ?? undefined} />
             <AvatarFallback className="bg-primary text-white text-sm">
               {getInitials(session.user.name ?? "U")}
             </AvatarFallback>
           </Avatar>
-          <div className="flex-1 text-left">
-            <p className="text-sm font-medium">{session.user.name}</p>
-            <p className="text-xs text-gray-500">{session.user.role}</p>
-          </div>
+          {!collapsed && (
+            <div className="flex-1 text-left">
+              <p className="text-sm font-medium">{session.user.name}</p>
+              <p className="text-xs text-gray-500">{session.user.role}</p>
+            </div>
+          )}
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
