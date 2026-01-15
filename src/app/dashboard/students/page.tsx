@@ -43,7 +43,7 @@ import {
 import { Badge } from "~/components/ui/badge";
 import { useToast } from "~/hooks/use-toast";
 import { Toaster } from "~/components/ui/toaster";
-import { Plus, Pencil, Trash2, Search, Upload, Download, AlertCircle, CheckCircle2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Search, Upload, Download, AlertCircle, CheckCircle2, GraduationCap } from "lucide-react";
 
 type StudentForm = {
   name: string;
@@ -388,33 +388,79 @@ John Doe,john@example.com,081234567890,Jl. Contoh No. 1,1234567890123456,12345,1
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-lg">Loading students...</div>
+      <div className="space-y-6">
+        {/* Header Skeleton */}
+        <div className="h-48 rounded-xl bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 animate-pulse" />
+
+        {/* Stats Skeleton */}
+        <div className="grid gap-4 md:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Card key={i}>
+              <CardContent className="p-6">
+                <div className="h-20 rounded bg-gray-200 animate-pulse" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {/* Content Skeleton */}
+        <Card>
+          <CardContent className="p-6">
+            <div className="space-y-4">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="h-16 rounded bg-gray-200 animate-pulse" />
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
   return (
-    <div>
+    <div className="space-y-6">
       <Toaster />
 
-      {/* Header */}
-      <div className="mb-8 flex items-center justify-between">
-        <div>
-          <h2 className="text-3xl font-bold">Data Siswa</h2>
-          <p className="text-muted-foreground">
-            Kelola data siswa dan informasi akademik
-          </p>
+      {/* Header with Gradient Background */}
+      <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 p-8 text-white shadow-lg">
+        <div className="relative z-10">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="rounded-full bg-white/20 p-4 backdrop-blur-sm">
+                <GraduationCap className="h-8 w-8" />
+              </div>
+              <div>
+                <h1 className="text-4xl font-bold">Data Siswa</h1>
+                <p className="mt-2 text-green-100">
+                  Kelola data siswa dan informasi akademik
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="lg"
+                onClick={openImportDialog}
+                className="border-white/20 bg-white/10 text-white backdrop-blur-sm hover:bg-white/20"
+              >
+                <Upload className="mr-2 h-5 w-5" />
+                Import Data
+              </Button>
+              <Button
+                size="lg"
+                onClick={openAddDialog}
+                className="bg-white text-emerald-600 hover:bg-white/90"
+              >
+                <Plus className="mr-2 h-5 w-5" />
+                Tambah Siswa
+              </Button>
+            </div>
+          </div>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={openImportDialog}>
-            <Upload className="mr-2 h-4 w-4" />
-            Import Data
-          </Button>
-          <Button onClick={openAddDialog}>
-            <Plus className="mr-2 h-4 w-4" />
-            Tambah Siswa
-          </Button>
+        {/* Decorative background */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute right-0 top-0 h-64 w-64 rounded-full bg-white"></div>
+          <div className="absolute bottom-0 left-0 h-48 w-48 rounded-full bg-white"></div>
         </div>
       </div>
 
@@ -993,47 +1039,87 @@ John Doe,john@example.com,081234567890,Jl. Contoh No. 1,1234567890123456,12345,1
       </Card>
 
       {/* Quick Stats */}
-      <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-4">
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-primary">
-                {pagination?.total ?? 0}
+      <div className="grid gap-4 md:grid-cols-4">
+        <Card className="overflow-hidden border-l-4 border-l-green-500 transition-all hover:shadow-lg">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Total Siswa
+                </p>
+                <p className="mt-2 text-3xl font-bold">
+                  {pagination?.total ?? 0}
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Semua siswa
+                </p>
               </div>
-              <p className="text-sm text-muted-foreground">Total Siswa</p>
+              <div className="rounded-full bg-green-100 p-4">
+                <GraduationCap className="h-7 w-7 text-green-600" />
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-green-600">
-                {students.filter((s) => !s.isAlumni).length}
+        <Card className="overflow-hidden border-l-4 border-l-blue-500 transition-all hover:shadow-lg">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Siswa Aktif
+                </p>
+                <p className="mt-2 text-3xl font-bold">
+                  {students.filter((s) => !s.isAlumni).length}
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Masih bersekolah
+                </p>
               </div>
-              <p className="text-sm text-muted-foreground">Siswa Aktif</p>
+              <div className="rounded-full bg-blue-100 p-4">
+                <CheckCircle2 className="h-7 w-7 text-blue-600" />
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-gray-600">
-                {students.filter((s) => s.isAlumni).length}
+        <Card className="overflow-hidden border-l-4 border-l-purple-500 transition-all hover:shadow-lg">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Alumni
+                </p>
+                <p className="mt-2 text-3xl font-bold">
+                  {students.filter((s) => s.isAlumni).length}
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Sudah lulus
+                </p>
               </div>
-              <p className="text-sm text-muted-foreground">Alumni</p>
+              <div className="rounded-full bg-purple-100 p-4">
+                <GraduationCap className="h-7 w-7 text-purple-600" />
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-blue-600">
-                {students.filter((s) => s.currentClass).length}
+        <Card className="overflow-hidden border-l-4 border-l-orange-500 transition-all hover:shadow-lg">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Punya Kelas
+                </p>
+                <p className="mt-2 text-3xl font-bold">
+                  {students.filter((s) => s.currentClass).length}
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Sudah terdaftar
+                </p>
               </div>
-              <p className="text-sm text-muted-foreground">Punya Kelas</p>
+              <div className="rounded-full bg-orange-100 p-4">
+                <CheckCircle2 className="h-7 w-7 text-orange-600" />
+              </div>
             </div>
           </CardContent>
         </Card>
