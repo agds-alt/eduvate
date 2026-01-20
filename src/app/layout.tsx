@@ -4,6 +4,7 @@ import { type Metadata } from "next";
 import { Inter } from "next/font/google";
 import { TRPCReactProvider } from "~/lib/trpc-provider";
 import { AuthSessionProvider } from "~/components/providers/session-provider";
+import { Toaster } from "sonner";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -23,7 +24,10 @@ export default function RootLayout({
     <html lang="en" className={`${inter.variable}`}>
       <body>
         <AuthSessionProvider>
-          <TRPCReactProvider>{children}</TRPCReactProvider>
+          <TRPCReactProvider>
+            {children}
+            <Toaster richColors position="top-right" />
+          </TRPCReactProvider>
         </AuthSessionProvider>
       </body>
     </html>
