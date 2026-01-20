@@ -174,8 +174,8 @@ async function main() {
   let studentCounter = 1;
 
   for (const classData of classes) {
-    // Create 10 students per class
-    for (let i = 1; i <= 10; i++) {
+    // Create 5 students per class (for faster seeding)
+    for (let i = 1; i <= 5; i++) {
       const user = await prisma.user.create({
         data: {
           name: `Siswa ${studentCounter}`,
@@ -238,31 +238,63 @@ async function main() {
     });
   }
 
-  // 10. Create Attendance Records
-  console.log("✅ Creating attendance records...");
+  // 10. Create Attendance Records (10 days history with batch insert)
+  console.log("✅ Creating attendance records (10 days)...");
   const today = new Date();
   const statuses = [
     AttendanceStatus.PRESENT,
     AttendanceStatus.PRESENT,
     AttendanceStatus.PRESENT,
+    AttendanceStatus.PRESENT,
+    AttendanceStatus.PRESENT,
     AttendanceStatus.LATE,
+    AttendanceStatus.ABSENT,
     AttendanceStatus.SICK,
+    AttendanceStatus.PERMISSION,
   ];
 
-  for (const student of students.slice(0, 30)) {
-    await prisma.attendance.create({
-      data: {
-        schoolId: school.id,
-        studentId: student.id,
-        classId: student.currentClassId!,
-        teacherId: teachers[0]!.id,
-        date: today,
-        status: statuses[Math.floor(Math.random() * statuses.length)]!,
-        type: AttendanceType.MANUAL,
-        checkInTime: new Date(today.setHours(7, 0, 0)),
-      },
-    });
+  // Generate attendance for last 10 days with bulk insert
+  const attendanceRecords = [];
+  for (let dayOffset = 0; dayOffset < 10; dayOffset++) {
+    const date = new Date(today);
+    date.setDate(date.getDate() - dayOffset);
+
+    // Skip weekends
+    if (date.getDay() === 0 || date.getDay() === 6) continue;
+
+    // Create attendance for all students (more realistic)
+    for (const student of students) {
+      // Random chance to have attendance (95% attendance rate)
+      if (Math.random() < 0.95) {
+        const status = statuses[Math.floor(Math.random() * statuses.length)]!;
+        const checkInHour = status === AttendanceStatus.LATE ? 7 + Math.random() * 0.5 : 7;
+        const checkInMinute = Math.floor(Math.random() * 60);
+        const checkOutHour = 15;
+        const checkOutMinute = Math.floor(Math.random() * 60);
+
+        attendanceRecords.push({
+          schoolId: school.id,
+          studentId: student.id,
+          classId: student.currentClassId!,
+          teacherId: teachers[Math.floor(Math.random() * teachers.length)]!.id,
+          date: new Date(date.setHours(0, 0, 0, 0)),
+          status: status,
+          type: dayOffset < 7 ? AttendanceType.MANUAL : [AttendanceType.MANUAL, AttendanceType.SCANNER][Math.floor(Math.random() * 2)]!,
+          checkInTime: status === AttendanceStatus.PRESENT || status === AttendanceStatus.LATE
+            ? new Date(date.getFullYear(), date.getMonth(), date.getDate(), Math.floor(checkInHour), checkInMinute, 0)
+            : null,
+          checkOutTime: status === AttendanceStatus.PRESENT
+            ? new Date(date.getFullYear(), date.getMonth(), date.getDate(), checkOutHour, checkOutMinute, 0)
+            : null,
+          notes: status === AttendanceStatus.SICK ? "Sakit" : status === AttendanceStatus.PERMISSION ? "Izin keluarga" : null,
+        });
+      }
+    }
   }
+
+  // Bulk insert attendance records
+  await prisma.attendance.createMany({ data: attendanceRecords });
+  console.log(`✅ Created ${attendanceRecords.length} attendance records across 10 days!`);
 
   // 11. Create Exams
   console.log("📝 Creating exams...");
