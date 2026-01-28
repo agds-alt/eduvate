@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { api } from "~/lib/trpc-provider";
+import { FileText, Plus, Clock, CheckCircle2, Calendar, AlertCircle, Pencil, Trash2 } from "lucide-react";
 
 export default function ExamsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -73,85 +74,145 @@ export default function ExamsPage() {
 
   return (
     <div>
-      <div className="mb-8 flex items-center justify-between">
-        <div>
-          <h2 className="text-3xl font-bold">Manajemen Ujian</h2>
-          <p className="text-muted-foreground">Kelola jadwal dan pelaksanaan ujian</p>
+      {/* Header with Gradient */}
+      <div className="relative mb-8 overflow-hidden rounded-xl bg-gradient-to-r from-red-600 via-rose-600 to-pink-600 p-8 text-white shadow-lg">
+        <div className="relative z-10">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="rounded-full bg-white/20 p-4 backdrop-blur-sm">
+                <FileText className="h-8 w-8" />
+              </div>
+              <div>
+                <h2 className="text-3xl font-bold">Manajemen Ujian</h2>
+                <p className="mt-1 text-red-100">
+                  Kelola jadwal dan pelaksanaan ujian
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="flex items-center gap-2 rounded-lg bg-white px-6 py-3 font-semibold text-red-600 shadow-lg transition-all hover:bg-white/90"
+            >
+              <Plus className="h-5 w-5" />
+              Buat Ujian
+            </button>
+          </div>
         </div>
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="rounded-lg bg-primary px-4 py-2 text-white hover:bg-primary/90"
-        >
-          + Buat Ujian
-        </button>
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute -right-12 -top-12 h-48 w-48 rounded-full bg-white"></div>
+          <div className="absolute -bottom-8 -left-8 h-32 w-32 rounded-full bg-white"></div>
+        </div>
       </div>
 
       {/* Statistics Cards */}
       <div className="mb-6 grid grid-cols-1 gap-6 md:grid-cols-4">
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-primary">
-                {isLoading ? "..." : stats?.totalExams ?? 0}
+        <Card className="overflow-hidden border-l-4 border-l-red-500 transition-all hover:shadow-lg">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Total Ujian
+                </p>
+                <p className="mt-2 text-3xl font-bold">
+                  {isLoading ? "..." : stats?.totalExams ?? 0}
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">Semua ujian</p>
               </div>
-              <p className="text-sm text-muted-foreground">Total Ujian</p>
+              <div className="rounded-full bg-red-100 p-4">
+                <FileText className="h-7 w-7 text-red-600" />
+              </div>
             </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-blue-600">
-                {isLoading ? "..." : stats?.ongoingExams ?? 0}
+
+        <Card className="overflow-hidden border-l-4 border-l-blue-500 transition-all hover:shadow-lg">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Sedang Berlangsung
+                </p>
+                <p className="mt-2 text-3xl font-bold">
+                  {isLoading ? "..." : stats?.ongoingExams ?? 0}
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">Ujian aktif</p>
               </div>
-              <p className="text-sm text-muted-foreground">Sedang Berlangsung</p>
+              <div className="rounded-full bg-blue-100 p-4">
+                <Clock className="h-7 w-7 text-blue-600" />
+              </div>
             </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-green-600">
-                {isLoading ? "..." : stats?.completedExams ?? 0}
+
+        <Card className="overflow-hidden border-l-4 border-l-green-500 transition-all hover:shadow-lg">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Selesai
+                </p>
+                <p className="mt-2 text-3xl font-bold">
+                  {isLoading ? "..." : stats?.completedExams ?? 0}
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">Telah dilaksanakan</p>
               </div>
-              <p className="text-sm text-muted-foreground">Selesai</p>
+              <div className="rounded-full bg-green-100 p-4">
+                <CheckCircle2 className="h-7 w-7 text-green-600" />
+              </div>
             </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-yellow-600">
-                {isLoading ? "..." : stats?.upcomingExams ?? 0}
+
+        <Card className="overflow-hidden border-l-4 border-l-yellow-500 transition-all hover:shadow-lg">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Akan Datang
+                </p>
+                <p className="mt-2 text-3xl font-bold">
+                  {isLoading ? "..." : stats?.upcomingExams ?? 0}
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">Dijadwalkan</p>
               </div>
-              <p className="text-sm text-muted-foreground">Akan Datang</p>
+              <div className="rounded-full bg-yellow-100 p-4">
+                <Calendar className="h-7 w-7 text-yellow-600" />
+              </div>
             </div>
           </CardContent>
         </Card>
       </div>
 
       {/* Exams List */}
-      <Card>
+      <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10">
         <CardHeader>
-          <CardTitle>Daftar Ujian</CardTitle>
+          <div className="flex items-center gap-2">
+            <div className="rounded-full bg-red-100 p-2">
+              <FileText className="h-5 w-5 text-red-600" />
+            </div>
+            <CardTitle>Daftar Ujian</CardTitle>
+          </div>
         </CardHeader>
         <CardContent>
           {isLoading ? (
             <div className="py-12 text-center text-muted-foreground">
+              <div className="mb-4 flex justify-center">
+                <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+              </div>
               <p>Memuat data...</p>
             </div>
           ) : exams && exams.length > 0 ? (
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto rounded-lg border bg-white">
               <table className="w-full">
-                <thead>
+                <thead className="bg-gray-50">
                   <tr className="border-b">
-                    <th className="px-4 py-3 text-left">Judul</th>
-                    <th className="px-4 py-3 text-left">Jenis</th>
-                    <th className="px-4 py-3 text-left">Mata Pelajaran</th>
-                    <th className="px-4 py-3 text-left">Kelas</th>
-                    <th className="px-4 py-3 text-left">Tanggal</th>
-                    <th className="px-4 py-3 text-left">Status</th>
-                    <th className="px-4 py-3 text-left">Aksi</th>
+                    <th className="px-4 py-3 text-left text-sm font-semibold">Judul</th>
+                    <th className="px-4 py-3 text-left text-sm font-semibold">Jenis</th>
+                    <th className="px-4 py-3 text-left text-sm font-semibold">Mata Pelajaran</th>
+                    <th className="px-4 py-3 text-left text-sm font-semibold">Kelas</th>
+                    <th className="px-4 py-3 text-left text-sm font-semibold">Tanggal</th>
+                    <th className="px-4 py-3 text-left text-sm font-semibold">Status</th>
+                    <th className="px-4 py-3 text-left text-sm font-semibold">Aksi</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -162,38 +223,61 @@ export default function ExamsPage() {
                     const isOngoing = !isUpcoming && !isCompleted;
 
                     return (
-                      <tr key={exam.id} className="border-b hover:bg-gray-50">
-                        <td className="px-4 py-3 font-medium">{exam.title}</td>
-                        <td className="px-4 py-3">{exam.type}</td>
-                        <td className="px-4 py-3">{exam.subject.name}</td>
+                      <tr key={exam.id} className="border-b transition-colors hover:bg-gray-50">
                         <td className="px-4 py-3">
-                          {exam.class.name} {exam.class.section}
+                          <div className="flex items-center gap-2">
+                            <div className="rounded-full bg-red-100 p-1.5">
+                              <FileText className="h-3.5 w-3.5 text-red-600" />
+                            </div>
+                            <span className="font-medium">{exam.title}</span>
+                          </div>
                         </td>
                         <td className="px-4 py-3">
-                          {new Date(exam.startDate).toLocaleDateString("id-ID")}
+                          <span className="rounded-md bg-gray-100 px-2 py-1 text-xs font-medium text-gray-700">
+                            {exam.type}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-sm">{exam.subject.name}</td>
+                        <td className="px-4 py-3 text-sm">
+                          {exam.class.name} {exam.class.section}
+                        </td>
+                        <td className="px-4 py-3 text-sm">
+                          <div className="flex items-center gap-1 text-muted-foreground">
+                            <Calendar className="h-3.5 w-3.5" />
+                            {new Date(exam.startDate).toLocaleDateString("id-ID")}
+                          </div>
                         </td>
                         <td className="px-4 py-3">
                           {isOngoing && (
-                            <span className="rounded-full bg-blue-100 px-2 py-1 text-xs text-blue-700">
+                            <span className="flex items-center gap-1 rounded-full bg-blue-100 px-2.5 py-1 text-xs font-medium text-blue-700">
+                              <Clock className="h-3 w-3" />
                               Berlangsung
                             </span>
                           )}
                           {isCompleted && (
-                            <span className="rounded-full bg-green-100 px-2 py-1 text-xs text-green-700">
+                            <span className="flex items-center gap-1 rounded-full bg-green-100 px-2.5 py-1 text-xs font-medium text-green-700">
+                              <CheckCircle2 className="h-3 w-3" />
                               Selesai
                             </span>
                           )}
                           {isUpcoming && (
-                            <span className="rounded-full bg-yellow-100 px-2 py-1 text-xs text-yellow-700">
+                            <span className="flex items-center gap-1 rounded-full bg-yellow-100 px-2.5 py-1 text-xs font-medium text-yellow-700">
+                              <AlertCircle className="h-3 w-3" />
                               Akan Datang
                             </span>
                           )}
                         </td>
                         <td className="px-4 py-3">
-                          <button className="mr-3 text-sm text-blue-600 hover:underline">
-                            Detail
-                          </button>
-                          <button className="text-sm text-red-600 hover:underline">Hapus</button>
+                          <div className="flex gap-2">
+                            <button className="flex items-center gap-1 rounded-lg border border-blue-200 bg-blue-50 px-2.5 py-1.5 text-xs font-medium text-blue-700 transition-all hover:bg-blue-100">
+                              <Pencil className="h-3 w-3" />
+                              Detail
+                            </button>
+                            <button className="flex items-center gap-1 rounded-lg border border-red-200 bg-red-50 px-2.5 py-1.5 text-xs font-medium text-red-700 transition-all hover:bg-red-100">
+                              <Trash2 className="h-3 w-3" />
+                              Hapus
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     );
@@ -202,9 +286,13 @@ export default function ExamsPage() {
               </table>
             </div>
           ) : (
-            <div className="py-12 text-center text-muted-foreground">
-              <div className="mb-4 text-4xl">📝</div>
-              <p>Belum ada data ujian</p>
+            <div className="rounded-lg bg-white py-12 text-center text-muted-foreground">
+              <div className="mb-4 flex justify-center">
+                <div className="rounded-full bg-gray-100 p-6">
+                  <FileText className="h-12 w-12 text-gray-400" />
+                </div>
+              </div>
+              <p className="font-medium">Belum ada data ujian</p>
               <p className="mt-2 text-sm">Buat ujian baru untuk memulai</p>
             </div>
           )}

@@ -273,8 +273,8 @@ export default function TeachersPage() {
 
   const getPositionColor = (position: string) => {
     const colors: Record<string, string> = {
-      "Kepala Sekolah": "bg-purple-100 text-purple-800 border-purple-200",
-      "Wakil Kepala Sekolah": "bg-indigo-100 text-indigo-800 border-indigo-200",
+      "Kepala Sekolah/Madrasah": "bg-purple-100 text-purple-800 border-purple-200",
+      "Wakil Kepala Sekolah/Madrasah": "bg-indigo-100 text-indigo-800 border-indigo-200",
       Guru: "bg-blue-100 text-blue-800 border-blue-200",
       "Guru Wali Kelas": "bg-green-100 text-green-800 border-green-200",
       "Staff TU": "bg-orange-100 text-orange-800 border-orange-200",
@@ -460,9 +460,9 @@ export default function TeachersPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Semua Jabatan</SelectItem>
-                  <SelectItem value="Kepala Sekolah">Kepala Sekolah</SelectItem>
-                  <SelectItem value="Wakil Kepala Sekolah">
-                    Wakil Kepala Sekolah
+                  <SelectItem value="Kepala Sekolah/Madrasah">Kepala Sekolah/Madrasah</SelectItem>
+                  <SelectItem value="Wakil Kepala Sekolah/Madrasah">
+                    Wakil Kepala Sekolah/Madrasah
                   </SelectItem>
                   <SelectItem value="Guru">Guru</SelectItem>
                   <SelectItem value="Guru Wali Kelas">Guru Wali Kelas</SelectItem>
@@ -807,11 +807,11 @@ export default function TeachersPage() {
                     <SelectValue placeholder="Pilih Jabatan" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Kepala Sekolah">
-                      Kepala Sekolah
+                    <SelectItem value="Kepala Sekolah/Madrasah">
+                      Kepala Sekolah/Madrasah
                     </SelectItem>
-                    <SelectItem value="Wakil Kepala Sekolah">
-                      Wakil Kepala Sekolah
+                    <SelectItem value="Wakil Kepala Sekolah/Madrasah">
+                      Wakil Kepala Sekolah/Madrasah
                     </SelectItem>
                     <SelectItem value="Guru">Guru</SelectItem>
                     <SelectItem value="Guru Wali Kelas">

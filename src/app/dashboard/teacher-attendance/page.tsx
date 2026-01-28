@@ -153,53 +153,100 @@ export default function TeacherAttendancePage() {
     <div>
       <Toaster />
 
-      {/* Header */}
-      <div className="mb-8">
-        <h2 className="text-3xl font-bold">Absensi Guru</h2>
-        <p className="text-muted-foreground">
-          Kelola dan monitor kehadiran guru
-        </p>
+      {/* Header with Gradient */}
+      <div className="relative mb-8 overflow-hidden rounded-xl bg-gradient-to-r from-cyan-600 via-sky-600 to-blue-600 p-8 text-white shadow-lg">
+        <div className="relative z-10">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="rounded-full bg-white/20 p-4 backdrop-blur-sm">
+                <UserCheck className="h-8 w-8" />
+              </div>
+              <div>
+                <h2 className="text-3xl font-bold">Absensi Guru</h2>
+                <p className="mt-1 text-cyan-100">
+                  Kelola dan monitor kehadiran guru
+                </p>
+              </div>
+            </div>
+            <Button className="bg-white text-cyan-600 hover:bg-white/90 shadow-lg">
+              <Download className="mr-2 h-4 w-4" />
+              Export Excel
+            </Button>
+          </div>
+        </div>
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute -right-12 -top-12 h-48 w-48 rounded-full bg-white"></div>
+          <div className="absolute -bottom-8 -left-8 h-32 w-32 rounded-full bg-white"></div>
+        </div>
       </div>
 
       {/* Statistics Cards */}
       <div className="mb-6 grid grid-cols-1 gap-6 md:grid-cols-4">
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-primary">
-                {stats?.attendanceRate ?? 0}%
+        <Card className="overflow-hidden border-l-4 border-l-cyan-500 transition-all hover:shadow-lg">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Tingkat Kehadiran
+                </p>
+                <p className="mt-2 text-3xl font-bold text-cyan-600">
+                  {stats?.attendanceRate ?? 0}%
+                </p>
               </div>
-              <p className="text-sm text-muted-foreground">Tingkat Kehadiran</p>
+              <div className="rounded-full bg-cyan-100 p-4">
+                <FileText className="h-7 w-7 text-cyan-600" />
+              </div>
             </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-green-600">
-                {stats?.present ?? 0}
+        <Card className="overflow-hidden border-l-4 border-l-green-500 transition-all hover:shadow-lg">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Hadir Tepat Waktu
+                </p>
+                <p className="mt-2 text-3xl font-bold text-green-600">
+                  {stats?.present ?? 0}
+                </p>
               </div>
-              <p className="text-sm text-muted-foreground">Hadir Tepat Waktu</p>
+              <div className="rounded-full bg-green-100 p-4">
+                <CheckCircle className="h-7 w-7 text-green-600" />
+              </div>
             </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-yellow-600">
-                {stats?.late ?? 0}
+        <Card className="overflow-hidden border-l-4 border-l-yellow-500 transition-all hover:shadow-lg">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Terlambat
+                </p>
+                <p className="mt-2 text-3xl font-bold text-yellow-600">
+                  {stats?.late ?? 0}
+                </p>
               </div>
-              <p className="text-sm text-muted-foreground">Terlambat</p>
+              <div className="rounded-full bg-yellow-100 p-4">
+                <Clock className="h-7 w-7 text-yellow-600" />
+              </div>
             </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-red-600">
-                {stats?.absent ?? 0}
+        <Card className="overflow-hidden border-l-4 border-l-red-500 transition-all hover:shadow-lg">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Tidak Hadir
+                </p>
+                <p className="mt-2 text-3xl font-bold text-red-600">
+                  {stats?.absent ?? 0}
+                </p>
               </div>
-              <p className="text-sm text-muted-foreground">Tidak Hadir</p>
+              <div className="rounded-full bg-red-100 p-4">
+                <UserX className="h-7 w-7 text-red-600" />
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -340,13 +387,7 @@ export default function TeacherAttendancePage() {
       {/* Attendance Table */}
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle>Daftar Kehadiran ({pagination?.total ?? 0})</CardTitle>
-            <Button variant="outline" size="sm">
-              <Download className="mr-2 h-4 w-4" />
-              Export Excel
-            </Button>
-          </div>
+          <CardTitle>Daftar Kehadiran ({pagination?.total ?? 0})</CardTitle>
         </CardHeader>
         <CardContent>
           {attendances.length === 0 ? (

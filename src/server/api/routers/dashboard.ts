@@ -192,6 +192,7 @@ export const dashboardRouter = createTRPCRouter({
       upcomingExams,
       recentInformation,
       upcomingHolidays,
+      upcomingEvents,
       financeStats,
       examResults,
     ] = await Promise.all([
@@ -221,6 +222,14 @@ export const dashboardRouter = createTRPCRouter({
           date: { gte: today },
         },
         orderBy: { date: "asc" },
+        take: 5,
+      }),
+      ctx.db.agenda.findMany({
+        where: {
+          schoolId: school.id,
+          startDate: { gte: today },
+        },
+        orderBy: { startDate: "asc" },
         take: 5,
       }),
       ctx.db.finance.groupBy({
@@ -255,6 +264,7 @@ export const dashboardRouter = createTRPCRouter({
       upcomingExams,
       recentInformation,
       upcomingHolidays,
+      upcomingEvents,
       financeStats: {
         totalAmount,
         paidAmount,

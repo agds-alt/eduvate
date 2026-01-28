@@ -129,6 +129,7 @@ export const subjectRouter = createTRPCRouter({
         name: z.string().min(1, "Name is required"),
         code: z.string().optional(),
         description: z.string().optional(),
+        subjectGroup: z.string().optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -148,6 +149,7 @@ export const subjectRouter = createTRPCRouter({
           name: input.name,
           code: input.code,
           description: input.description,
+          subjectGroup: input.subjectGroup,
         },
         include: {
           school: {
@@ -174,6 +176,7 @@ export const subjectRouter = createTRPCRouter({
         name: z.string().min(1).optional(),
         code: z.string().optional().nullable(),
         description: z.string().optional().nullable(),
+        subjectGroup: z.string().optional().nullable(),
       })
     )
     .mutation(async ({ ctx, input }) => {

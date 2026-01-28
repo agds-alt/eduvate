@@ -100,6 +100,138 @@ export default function DashboardPage() {
         </div>
       </div>
 
+      {/* Information & Announcements - Moved to Top */}
+      <Card className="border-orange-500/20 bg-gradient-to-br from-orange-50 to-white">
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <div className="rounded-full bg-orange-100 p-2">
+              <Bell className="h-5 w-5 text-orange-600" />
+            </div>
+            <CardTitle className="text-lg font-semibold">Informasi & Pengumuman</CardTitle>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {isComprehensiveLoading ? (
+            <div className="space-y-4">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="space-y-2">
+                  <Skeleton className="h-5 w-full" />
+                  <Skeleton className="h-4 w-4/5" />
+                  <Skeleton className="h-3 w-1/3" />
+                </div>
+              ))}
+            </div>
+          ) : comprehensiveStats?.recentInformation && comprehensiveStats.recentInformation.length > 0 ? (
+            <div className="space-y-4">
+              {comprehensiveStats.recentInformation.map((info) => (
+                <div key={info.id} className="rounded-lg border border-orange-200 p-4 transition-colors hover:bg-orange-50/50">
+                  <div className="flex items-start gap-3">
+                    <div className="rounded-full bg-orange-100 p-2">
+                      <Bell className="h-4 w-4 text-orange-600" />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-orange-900">{info.title}</h4>
+                      <p className="mt-1 line-clamp-2 text-sm text-gray-700">
+                        {info.content}
+                      </p>
+                      <p className="mt-2 flex items-center gap-1 text-xs text-gray-500">
+                        <Calendar className="h-3 w-3" />
+                        {info.publishedAt
+                          ? new Date(info.publishedAt).toLocaleDateString("id-ID", {
+                              day: "numeric",
+                              month: "short",
+                              year: "numeric",
+                            })
+                          : "Belum dipublikasi"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="py-8 text-center text-sm text-muted-foreground">
+              <Bell className="mx-auto mb-2 h-8 w-8 text-gray-400" />
+              <p>Tidak ada informasi tersedia</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Academic Calendar */}
+      <Card className="border-indigo-500/20 bg-gradient-to-br from-indigo-50 to-white">
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <div className="rounded-full bg-indigo-100 p-2">
+              <CalendarDays className="h-5 w-5 text-indigo-600" />
+            </div>
+            <CardTitle className="text-lg font-semibold">Kalender Akademik</CardTitle>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {isComprehensiveLoading ? (
+            <div className="space-y-4">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="space-y-2">
+                  <Skeleton className="h-5 w-full" />
+                  <Skeleton className="h-4 w-4/5" />
+                  <Skeleton className="h-3 w-1/3" />
+                </div>
+              ))}
+            </div>
+          ) : comprehensiveStats?.upcomingEvents && comprehensiveStats.upcomingEvents.length > 0 ? (
+            <div className="space-y-4">
+              {comprehensiveStats.upcomingEvents.map((event) => (
+                <div key={event.id} className="rounded-lg border border-indigo-200 p-4 transition-colors hover:bg-indigo-50/50">
+                  <div className="flex items-start gap-3">
+                    <div className="rounded-full bg-indigo-100 p-2">
+                      <CalendarDays className="h-4 w-4 text-indigo-600" />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-indigo-900">{event.title}</h4>
+                      <p className="mt-1 line-clamp-2 text-sm text-gray-700">
+                        {event.description || "Tidak ada deskripsi"}
+                      </p>
+                      <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-gray-500">
+                        <p className="flex items-center gap-1">
+                          <Calendar className="h-3 w-3" />
+                          {new Date(event.startDate).toLocaleDateString("id-ID", {
+                            day: "numeric",
+                            month: "short",
+                            year: "numeric",
+                          })}
+                          {event.endDate && event.endDate !== event.startDate && (
+                            <span>
+                              {" - "}
+                              {new Date(event.endDate).toLocaleDateString("id-ID", {
+                                day: "numeric",
+                                month: "short",
+                                year: "numeric",
+                              })}
+                            </span>
+                          )}
+                        </p>
+                        {event.location && (
+                          <p className="flex items-center gap-1">
+                            <MapPin className="h-3 w-3" />
+                            {event.location}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="py-8 text-center text-sm text-muted-foreground">
+              <CalendarDays className="mx-auto mb-2 h-8 w-8 text-gray-400" />
+              <p>Tidak ada acara akademik mendatang</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       {/* Quick Actions */}
       <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10">
         <CardContent className="pt-6">
@@ -603,76 +735,17 @@ export default function DashboardPage() {
         </Card>
       </div>
 
-      {/* Two Column Layout */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        {/* Information Board */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <div className="rounded-full bg-orange-100 p-2">
-                <Bell className="h-5 w-5 text-orange-600" />
-              </div>
-              <CardTitle className="text-base">Informasi & Pengumuman</CardTitle>
+      {/* Upcoming Holidays */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <div className="rounded-full bg-teal-100 p-2">
+              <Palmtree className="h-5 w-5 text-teal-600" />
             </div>
-          </CardHeader>
-          <CardContent>
-            {isComprehensiveLoading ? (
-              <div className="space-y-4">
-                {Array.from({ length: 3 }).map((_, i) => (
-                  <div key={i} className="space-y-2">
-                    <Skeleton className="h-5 w-full" />
-                    <Skeleton className="h-4 w-4/5" />
-                    <Skeleton className="h-3 w-1/3" />
-                  </div>
-                ))}
-              </div>
-            ) : comprehensiveStats?.recentInformation && comprehensiveStats.recentInformation.length > 0 ? (
-              <div className="space-y-4">
-                {comprehensiveStats.recentInformation.map((info) => (
-                  <div key={info.id} className="rounded-lg border p-4 transition-colors hover:bg-gray-50">
-                    <div className="flex items-start gap-3">
-                      <div className="rounded-full bg-orange-100 p-2">
-                        <Bell className="h-4 w-4 text-orange-600" />
-                      </div>
-                      <div className="flex-1">
-                        <h4 className="font-medium">{info.title}</h4>
-                        <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
-                          {info.content}
-                        </p>
-                        <p className="mt-2 flex items-center gap-1 text-xs text-muted-foreground">
-                          <Calendar className="h-3 w-3" />
-                          {info.publishedAt
-                            ? new Date(info.publishedAt).toLocaleDateString("id-ID", {
-                                day: "numeric",
-                                month: "short",
-                                year: "numeric",
-                              })
-                            : "Belum dipublikasi"}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="py-8 text-center text-sm text-muted-foreground">
-                Tidak ada informasi tersedia
-              </p>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Upcoming Holidays */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <div className="rounded-full bg-teal-100 p-2">
-                <Palmtree className="h-5 w-5 text-teal-600" />
-              </div>
-              <CardTitle className="text-base">Hari Libur Mendatang</CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent>
+            <CardTitle className="text-base">Hari Libur Mendatang</CardTitle>
+          </div>
+        </CardHeader>
+        <CardContent>
             {isComprehensiveLoading ? (
               <div className="space-y-4">
                 {Array.from({ length: 3 }).map((_, i) => (
@@ -714,9 +787,8 @@ export default function DashboardPage() {
                 Tidak ada libur mendatang
               </p>
             )}
-          </CardContent>
-        </Card>
-      </div>
+        </CardContent>
+      </Card>
 
       {/* Upcoming Agenda */}
       {!isMainLoading && dashboardData?.upcomingAgenda && dashboardData.upcomingAgenda.length > 0 && (

@@ -56,6 +56,23 @@ type StudentForm = {
   nisn: string;
   enrollmentYear: string;
   currentClassId: string;
+  distanceToSchool: string;
+  previousSchool: string;
+  // Parent data
+  fatherName: string;
+  fatherPhone: string;
+  fatherEmail: string;
+  fatherOccupation: string;
+  motherName: string;
+  motherPhone: string;
+  motherEmail: string;
+  motherOccupation: string;
+  // Guardian data
+  guardianName: string;
+  guardianPhone: string;
+  guardianEmail: string;
+  guardianOccupation: string;
+  guardianRelationship: string;
 };
 
 export default function StudentsPage() {
@@ -79,6 +96,7 @@ export default function StudentsPage() {
     failed: { row: number; name: string; error: string }[];
   } | null>(null);
   const [showResults, setShowResults] = useState(false);
+  const [guardianAutoFill, setGuardianAutoFill] = useState<"none" | "father" | "mother">("none");
 
   const [formData, setFormData] = useState<StudentForm>({
     name: "",
@@ -91,6 +109,21 @@ export default function StudentsPage() {
     nisn: "",
     enrollmentYear: new Date().getFullYear().toString(),
     currentClassId: "",
+    distanceToSchool: "",
+    previousSchool: "",
+    fatherName: "",
+    fatherPhone: "",
+    fatherEmail: "",
+    fatherOccupation: "",
+    motherName: "",
+    motherPhone: "",
+    motherEmail: "",
+    motherOccupation: "",
+    guardianName: "",
+    guardianPhone: "",
+    guardianEmail: "",
+    guardianOccupation: "",
+    guardianRelationship: "",
   });
 
   const utils = api.useUtils();
@@ -210,6 +243,17 @@ export default function StudentsPage() {
   const openEditDialog = (student: any) => {
     setIsEditing(true);
     setEditingId(student.id);
+
+    // Extract parent data from student.parents
+    const father = student.parents?.find((p: any) => p.relationship === "Father" || p.relationship === "Ayah Kandung");
+    const mother = student.parents?.find((p: any) => p.relationship === "Mother" || p.relationship === "Ibu Kandung");
+    const guardian = student.parents?.find((p: any) =>
+      p.relationship !== "Father" &&
+      p.relationship !== "Mother" &&
+      p.relationship !== "Ayah Kandung" &&
+      p.relationship !== "Ibu Kandung"
+    );
+
     setFormData({
       name: student.user.name,
       email: student.user.email || "",
@@ -221,6 +265,21 @@ export default function StudentsPage() {
       nisn: student.nisn || "",
       enrollmentYear: student.enrollmentYear?.toString() || "",
       currentClassId: student.currentClassId || "",
+      distanceToSchool: student.distanceToSchool || "",
+      previousSchool: student.previousSchool || "",
+      fatherName: father?.parent.user.name || "",
+      fatherPhone: father?.parent.user.phone || "",
+      fatherEmail: father?.parent.user.email || "",
+      fatherOccupation: father?.parent.occupation || "",
+      motherName: mother?.parent.user.name || "",
+      motherPhone: mother?.parent.user.phone || "",
+      motherEmail: mother?.parent.user.email || "",
+      motherOccupation: mother?.parent.occupation || "",
+      guardianName: guardian?.parent.user.name || "",
+      guardianPhone: guardian?.parent.user.phone || "",
+      guardianEmail: guardian?.parent.user.email || "",
+      guardianOccupation: guardian?.parent.occupation || "",
+      guardianRelationship: guardian?.relationship || "",
     });
     setIsDialogOpen(true);
   };
@@ -229,6 +288,34 @@ export default function StudentsPage() {
     setIsDialogOpen(false);
     setIsEditing(false);
     setEditingId(null);
+    setGuardianAutoFill("none");
+    setFormData({
+      name: "",
+      email: "",
+      phone: "",
+      address: "",
+      password: "",
+      nik: "",
+      nis: "",
+      nisn: "",
+      enrollmentYear: new Date().getFullYear().toString(),
+      currentClassId: "",
+      distanceToSchool: "",
+      previousSchool: "",
+      fatherName: "",
+      fatherPhone: "",
+      fatherEmail: "",
+      fatherOccupation: "",
+      motherName: "",
+      motherPhone: "",
+      motherEmail: "",
+      motherOccupation: "",
+      guardianName: "",
+      guardianPhone: "",
+      guardianEmail: "",
+      guardianOccupation: "",
+      guardianRelationship: "",
+    });
   };
 
   const openDeleteDialog = (id: string, name: string) => {
@@ -249,6 +336,42 @@ export default function StudentsPage() {
       return;
     }
 
+    // Prepare parent data
+    const parents = [];
+
+    // Add father if any data is filled
+    if (formData.fatherName || formData.fatherPhone || formData.fatherEmail) {
+      parents.push({
+        name: formData.fatherName || "",
+        phone: formData.fatherPhone || "",
+        email: formData.fatherEmail || "",
+        occupation: formData.fatherOccupation || "",
+        relationship: "Ayah Kandung",
+      });
+    }
+
+    // Add mother if any data is filled
+    if (formData.motherName || formData.motherPhone || formData.motherEmail) {
+      parents.push({
+        name: formData.motherName || "",
+        phone: formData.motherPhone || "",
+        email: formData.motherEmail || "",
+        occupation: formData.motherOccupation || "",
+        relationship: "Ibu Kandung",
+      });
+    }
+
+    // Add guardian if any data is filled
+    if (formData.guardianName || formData.guardianPhone || formData.guardianEmail) {
+      parents.push({
+        name: formData.guardianName || "",
+        phone: formData.guardianPhone || "",
+        email: formData.guardianEmail || "",
+        occupation: formData.guardianOccupation || "",
+        relationship: formData.guardianRelationship || "Wali",
+      });
+    }
+
     if (isEditing && editingId) {
       updateMutation.mutate({
         id: editingId,
@@ -261,6 +384,9 @@ export default function StudentsPage() {
         nisn: formData.nisn || undefined,
         enrollmentYear: formData.enrollmentYear ? parseInt(formData.enrollmentYear) : undefined,
         currentClassId: formData.currentClassId || null,
+        distanceToSchool: formData.distanceToSchool || undefined,
+        previousSchool: formData.previousSchool || undefined,
+        parents: parents.length > 0 ? parents : undefined,
       });
     } else {
       if (!formData.password) {
@@ -282,6 +408,9 @@ export default function StudentsPage() {
         nisn: formData.nisn || undefined,
         enrollmentYear: formData.enrollmentYear ? parseInt(formData.enrollmentYear) : undefined,
         currentClassId: formData.currentClassId || undefined,
+        distanceToSchool: formData.distanceToSchool || undefined,
+        previousSchool: formData.previousSchool || undefined,
+        parents: parents.length > 0 ? parents : undefined,
       });
     }
   };
@@ -582,6 +711,26 @@ John Doe,john@example.com,081234567890,Jl. Contoh No. 1,1234567890123456,12345,1
                 </Select>
               </div>
 
+              <div className="space-y-2">
+                <Label htmlFor="previousSchool">Asal Sekolah</Label>
+                <Input
+                  id="previousSchool"
+                  placeholder="Contoh: SD Negeri 1 Jakarta"
+                  value={formData.previousSchool}
+                  onChange={(e) => setFormData({ ...formData, previousSchool: e.target.value })}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="distanceToSchool">Jarak ke Sekolah</Label>
+                <Input
+                  id="distanceToSchool"
+                  placeholder="Contoh: 2 km atau 500 m"
+                  value={formData.distanceToSchool}
+                  onChange={(e) => setFormData({ ...formData, distanceToSchool: e.target.value })}
+                />
+              </div>
+
               <div className="space-y-2 md:col-span-2">
                 <Label htmlFor="address">Alamat</Label>
                 <Input
@@ -589,6 +738,196 @@ John Doe,john@example.com,081234567890,Jl. Contoh No. 1,1234567890123456,12345,1
                   value={formData.address}
                   onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                 />
+              </div>
+            </div>
+
+            {/* Data Keluarga Section */}
+            <div className="space-y-4 border-t pt-4">
+              <h3 className="text-lg font-semibold text-gray-900">Data Keluarga</h3>
+
+              {/* Data Ayah */}
+              <div className="space-y-3">
+                <h4 className="text-sm font-medium text-gray-700 bg-blue-50 px-3 py-2 rounded">Data Ayah Kandung</h4>
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="fatherName">Nama Ayah</Label>
+                    <Input
+                      id="fatherName"
+                      value={formData.fatherName}
+                      onChange={(e) => setFormData({ ...formData, fatherName: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="fatherPhone">Telepon Ayah</Label>
+                    <Input
+                      id="fatherPhone"
+                      value={formData.fatherPhone}
+                      onChange={(e) => setFormData({ ...formData, fatherPhone: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="fatherEmail">Email Ayah</Label>
+                    <Input
+                      id="fatherEmail"
+                      type="email"
+                      value={formData.fatherEmail}
+                      onChange={(e) => setFormData({ ...formData, fatherEmail: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="fatherOccupation">Pekerjaan Ayah</Label>
+                    <Input
+                      id="fatherOccupation"
+                      value={formData.fatherOccupation}
+                      onChange={(e) => setFormData({ ...formData, fatherOccupation: e.target.value })}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Data Ibu */}
+              <div className="space-y-3">
+                <h4 className="text-sm font-medium text-gray-700 bg-pink-50 px-3 py-2 rounded">Data Ibu Kandung</h4>
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="motherName">Nama Ibu</Label>
+                    <Input
+                      id="motherName"
+                      value={formData.motherName}
+                      onChange={(e) => setFormData({ ...formData, motherName: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="motherPhone">Telepon Ibu</Label>
+                    <Input
+                      id="motherPhone"
+                      value={formData.motherPhone}
+                      onChange={(e) => setFormData({ ...formData, motherPhone: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="motherEmail">Email Ibu</Label>
+                    <Input
+                      id="motherEmail"
+                      type="email"
+                      value={formData.motherEmail}
+                      onChange={(e) => setFormData({ ...formData, motherEmail: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="motherOccupation">Pekerjaan Ibu</Label>
+                    <Input
+                      id="motherOccupation"
+                      value={formData.motherOccupation}
+                      onChange={(e) => setFormData({ ...formData, motherOccupation: e.target.value })}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Data Wali */}
+              <div className="space-y-3">
+                <h4 className="text-sm font-medium text-gray-700 bg-green-50 px-3 py-2 rounded">Data Wali</h4>
+
+                {/* Auto-fill options */}
+                <div className="bg-gray-50 p-3 rounded-lg">
+                  <Label className="text-sm font-medium mb-2 block">Isi Otomatis Data Wali</Label>
+                  <Select
+                    value={guardianAutoFill}
+                    onValueChange={(value: "none" | "father" | "mother") => {
+                      setGuardianAutoFill(value);
+                      if (value === "father") {
+                        setFormData({
+                          ...formData,
+                          guardianName: formData.fatherName,
+                          guardianPhone: formData.fatherPhone,
+                          guardianEmail: formData.fatherEmail,
+                          guardianOccupation: formData.fatherOccupation,
+                          guardianRelationship: "Ayah Kandung",
+                        });
+                      } else if (value === "mother") {
+                        setFormData({
+                          ...formData,
+                          guardianName: formData.motherName,
+                          guardianPhone: formData.motherPhone,
+                          guardianEmail: formData.motherEmail,
+                          guardianOccupation: formData.motherOccupation,
+                          guardianRelationship: "Ibu Kandung",
+                        });
+                      }
+                    }}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Pilih untuk isi otomatis" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">Isi Manual</SelectItem>
+                      <SelectItem value="father">Sama dengan Ayah Kandung</SelectItem>
+                      <SelectItem value="mother">Sama dengan Ibu Kandung</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-gray-500 mt-2">Pilih untuk mengisi data wali secara otomatis dari data ayah atau ibu</p>
+                </div>
+
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="guardianName">Nama Wali</Label>
+                    <Input
+                      id="guardianName"
+                      value={formData.guardianName}
+                      onChange={(e) => {
+                        setFormData({ ...formData, guardianName: e.target.value });
+                        setGuardianAutoFill("none");
+                      }}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="guardianPhone">Telepon Wali</Label>
+                    <Input
+                      id="guardianPhone"
+                      value={formData.guardianPhone}
+                      onChange={(e) => {
+                        setFormData({ ...formData, guardianPhone: e.target.value });
+                        setGuardianAutoFill("none");
+                      }}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="guardianEmail">Email Wali</Label>
+                    <Input
+                      id="guardianEmail"
+                      type="email"
+                      value={formData.guardianEmail}
+                      onChange={(e) => {
+                        setFormData({ ...formData, guardianEmail: e.target.value });
+                        setGuardianAutoFill("none");
+                      }}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="guardianOccupation">Pekerjaan Wali</Label>
+                    <Input
+                      id="guardianOccupation"
+                      value={formData.guardianOccupation}
+                      onChange={(e) => {
+                        setFormData({ ...formData, guardianOccupation: e.target.value });
+                        setGuardianAutoFill("none");
+                      }}
+                    />
+                  </div>
+                  <div className="space-y-2 md:col-span-2">
+                    <Label htmlFor="guardianRelationship">Hubungan dengan Siswa</Label>
+                    <Input
+                      id="guardianRelationship"
+                      placeholder="Contoh: Ayah Kandung, Ibu Kandung, Kakak, Paman, dll"
+                      value={formData.guardianRelationship}
+                      onChange={(e) => {
+                        setFormData({ ...formData, guardianRelationship: e.target.value });
+                        setGuardianAutoFill("none");
+                      }}
+                    />
+                  </div>
+                </div>
               </div>
             </div>
 

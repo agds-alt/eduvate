@@ -7,7 +7,7 @@ import { api } from "~/trpc/react";
 import { format, startOfMonth, endOfMonth } from "date-fns";
 import { id } from "date-fns/locale";
 import { PaymentStatus } from "@prisma/client";
-import { Search, Download } from "lucide-react";
+import { Search, Download, Clock, AlertCircle } from "lucide-react";
 
 export default function OtherPaymentsPage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -117,47 +117,104 @@ export default function OtherPaymentsPage() {
 
   return (
     <div>
-      <div className="mb-8 flex items-center justify-between">
-        <div>
-          <h2 className="text-3xl font-bold">Pembayaran Lainnya</h2>
-          <p className="text-muted-foreground">Kelola pembayaran selain SPP</p>
+      {/* Header with Gradient */}
+      <div className="relative mb-8 overflow-hidden rounded-xl bg-gradient-to-r from-emerald-600 via-green-600 to-teal-600 p-8 text-white shadow-lg">
+        <div className="relative z-10">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="rounded-full bg-white/20 p-4 backdrop-blur-sm">
+                <Search className="h-8 w-8" />
+              </div>
+              <div>
+                <h2 className="text-3xl font-bold">Pembayaran Lainnya</h2>
+                <p className="mt-1 text-emerald-100">
+                  Kelola pembayaran selain SPP
+                </p>
+              </div>
+            </div>
+            <Button
+              onClick={handleExport}
+              disabled={filteredRecords.length === 0}
+              className="bg-white text-emerald-600 hover:bg-white/90 shadow-lg"
+            >
+              <Download className="mr-2 h-4 w-4" />
+              Export CSV
+            </Button>
+          </div>
         </div>
-        <Button onClick={handleExport} disabled={filteredRecords.length === 0}>
-          <Download className="mr-2 h-4 w-4" />
-          Export CSV
-        </Button>
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute -right-12 -top-12 h-48 w-48 rounded-full bg-white"></div>
+          <div className="absolute -bottom-8 -left-8 h-32 w-32 rounded-full bg-white"></div>
+        </div>
       </div>
 
+      {/* Stats Cards */}
       <div className="mb-6 grid grid-cols-1 gap-6 md:grid-cols-4">
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-primary">{stats.uniqueTypes}</div>
-              <p className="text-sm text-muted-foreground">Jenis Pembayaran</p>
+        <Card className="overflow-hidden border-l-4 border-l-emerald-500 transition-all hover:shadow-lg">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Jenis Pembayaran
+                </p>
+                <p className="mt-2 text-3xl font-bold text-emerald-600">
+                  {stats.uniqueTypes}
+                </p>
+              </div>
+              <div className="rounded-full bg-emerald-100 p-4">
+                <Search className="h-7 w-7 text-emerald-600" />
+              </div>
             </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-green-600">{formatCurrency(stats.totalAmount)}</div>
-              <p className="text-sm text-muted-foreground">Total Transaksi</p>
+        <Card className="overflow-hidden border-l-4 border-l-green-500 transition-all hover:shadow-lg">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Total Transaksi
+                </p>
+                <p className="mt-2 text-xl font-bold text-green-600">
+                  {formatCurrency(stats.totalAmount)}
+                </p>
+              </div>
+              <div className="rounded-full bg-green-100 p-4">
+                <Download className="h-7 w-7 text-green-600" />
+              </div>
             </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-blue-600">{stats.thisMonth}</div>
-              <p className="text-sm text-muted-foreground">Bulan Ini</p>
+        <Card className="overflow-hidden border-l-4 border-l-blue-500 transition-all hover:shadow-lg">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Bulan Ini
+                </p>
+                <p className="mt-2 text-3xl font-bold text-blue-600">
+                  {stats.thisMonth}
+                </p>
+              </div>
+              <div className="rounded-full bg-blue-100 p-4">
+                <Clock className="h-7 w-7 text-blue-600" />
+              </div>
             </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-yellow-600">{stats.pending}</div>
-              <p className="text-sm text-muted-foreground">Pending</p>
+        <Card className="overflow-hidden border-l-4 border-l-yellow-500 transition-all hover:shadow-lg">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Pending
+                </p>
+                <p className="mt-2 text-3xl font-bold text-yellow-600">
+                  {stats.pending}
+                </p>
+              </div>
+              <div className="rounded-full bg-yellow-100 p-4">
+                <AlertCircle className="h-7 w-7 text-yellow-600" />
+              </div>
             </div>
           </CardContent>
         </Card>

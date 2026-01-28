@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { api } from "~/lib/trpc-provider";
+import { Award, Plus, TrendingUp, CheckCircle2, XCircle, Users, Pencil, Trash2, Filter } from "lucide-react";
 
 export default function ExamResultsPage() {
   const [selectedExam, setSelectedExam] = useState("");
@@ -70,29 +71,49 @@ export default function ExamResultsPage() {
 
   return (
     <div>
-      <div className="mb-8 flex items-center justify-between">
-        <div>
-          <h2 className="text-3xl font-bold">Hasil Ujian</h2>
-          <p className="text-muted-foreground">Lihat dan kelola hasil ujian siswa</p>
+      {/* Header with Gradient */}
+      <div className="relative mb-8 overflow-hidden rounded-xl bg-gradient-to-r from-amber-600 via-orange-600 to-yellow-600 p-8 text-white shadow-lg">
+        <div className="relative z-10">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="rounded-full bg-white/20 p-4 backdrop-blur-sm">
+                <Award className="h-8 w-8" />
+              </div>
+              <div>
+                <h2 className="text-3xl font-bold">Hasil Ujian</h2>
+                <p className="mt-1 text-amber-100">
+                  Lihat dan kelola hasil ujian siswa
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="flex items-center gap-2 rounded-lg bg-white px-6 py-3 font-semibold text-amber-600 shadow-lg transition-all hover:bg-white/90"
+            >
+              <Plus className="h-5 w-5" />
+              Input Nilai
+            </button>
+          </div>
         </div>
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="rounded-lg bg-primary px-4 py-2 text-white hover:bg-primary/90"
-        >
-          + Input Nilai
-        </button>
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute -right-12 -top-12 h-48 w-48 rounded-full bg-white"></div>
+          <div className="absolute -bottom-8 -left-8 h-32 w-32 rounded-full bg-white"></div>
+        </div>
       </div>
 
-      {/* Filter Section */}
-      <Card className="mb-6">
+      {/* Filter Section with Gradient Background */}
+      <Card className="mb-6 border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10">
         <CardContent className="pt-6">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
-              <label className="mb-2 block text-sm font-medium">Filter Ujian</label>
+              <label className="mb-2 flex items-center gap-2 text-sm font-medium">
+                <Filter className="h-4 w-4 text-amber-600" />
+                Filter Ujian
+              </label>
               <select
                 value={selectedExam}
                 onChange={(e) => setSelectedExam(e.target.value)}
-                className="w-full rounded-lg border border-gray-300 px-4 py-2"
+                className="w-full rounded-lg border border-input bg-background px-4 py-2 transition-all focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
               >
                 <option value="">Semua Ujian</option>
                 {exams?.map((exam) => (
@@ -103,11 +124,14 @@ export default function ExamResultsPage() {
               </select>
             </div>
             <div>
-              <label className="mb-2 block text-sm font-medium">Filter Kelas</label>
+              <label className="mb-2 flex items-center gap-2 text-sm font-medium">
+                <Users className="h-4 w-4 text-orange-600" />
+                Filter Kelas
+              </label>
               <select
                 value={selectedClass}
                 onChange={(e) => setSelectedClass(e.target.value)}
-                className="w-full rounded-lg border border-gray-300 px-4 py-2"
+                className="w-full rounded-lg border border-input bg-background px-4 py-2 transition-all focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
               >
                 <option value="">Semua Kelas</option>
                 {classes?.classes?.map((cls: any) => (
@@ -123,71 +147,114 @@ export default function ExamResultsPage() {
 
       {/* Statistics Cards */}
       <div className="mb-6 grid grid-cols-1 gap-6 md:grid-cols-4">
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-primary">
-                {isLoading ? "..." : stats?.totalResults ?? 0}
+        <Card className="overflow-hidden border-l-4 border-l-amber-500 transition-all hover:shadow-lg">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Ujian Dinilai
+                </p>
+                <p className="mt-2 text-3xl font-bold">
+                  {isLoading ? "..." : stats?.totalResults ?? 0}
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">Total hasil</p>
               </div>
-              <p className="text-sm text-muted-foreground">Ujian Dinilai</p>
+              <div className="rounded-full bg-amber-100 p-4">
+                <Award className="h-7 w-7 text-amber-600" />
+              </div>
             </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-green-600">
-                {isLoading ? "..." : stats?.avgScore ?? 0}
+
+        <Card className="overflow-hidden border-l-4 border-l-green-500 transition-all hover:shadow-lg">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Rata-rata Nilai
+                </p>
+                <p className="mt-2 text-3xl font-bold">
+                  {isLoading ? "..." : stats?.avgScore ?? 0}
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">Nilai rerata</p>
               </div>
-              <p className="text-sm text-muted-foreground">Rata-rata Nilai</p>
+              <div className="rounded-full bg-green-100 p-4">
+                <TrendingUp className="h-7 w-7 text-green-600" />
+              </div>
             </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-blue-600">
-                {isLoading ? "..." : passCount}
+
+        <Card className="overflow-hidden border-l-4 border-l-blue-500 transition-all hover:shadow-lg">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Lulus (≥75)
+                </p>
+                <p className="mt-2 text-3xl font-bold">
+                  {isLoading ? "..." : passCount}
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">Siswa berhasil</p>
               </div>
-              <p className="text-sm text-muted-foreground">Lulus (≥75)</p>
+              <div className="rounded-full bg-blue-100 p-4">
+                <CheckCircle2 className="h-7 w-7 text-blue-600" />
+              </div>
             </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-red-600">
-                {isLoading ? "..." : failCount}
+
+        <Card className="overflow-hidden border-l-4 border-l-red-500 transition-all hover:shadow-lg">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Tidak Lulus (&lt;75)
+                </p>
+                <p className="mt-2 text-3xl font-bold">
+                  {isLoading ? "..." : failCount}
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">Perlu remedial</p>
               </div>
-              <p className="text-sm text-muted-foreground">Tidak Lulus (&lt;75)</p>
+              <div className="rounded-full bg-red-100 p-4">
+                <XCircle className="h-7 w-7 text-red-600" />
+              </div>
             </div>
           </CardContent>
         </Card>
       </div>
 
       {/* Results List */}
-      <Card>
+      <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10">
         <CardHeader>
-          <CardTitle>Daftar Hasil Ujian</CardTitle>
+          <div className="flex items-center gap-2">
+            <div className="rounded-full bg-amber-100 p-2">
+              <Award className="h-5 w-5 text-amber-600" />
+            </div>
+            <CardTitle>Daftar Hasil Ujian</CardTitle>
+          </div>
         </CardHeader>
         <CardContent>
           {isLoading ? (
             <div className="py-12 text-center text-muted-foreground">
+              <div className="mb-4 flex justify-center">
+                <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+              </div>
               <p>Memuat data...</p>
             </div>
           ) : results && results.length > 0 ? (
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto rounded-lg border bg-white">
               <table className="w-full">
-                <thead>
+                <thead className="bg-gray-50">
                   <tr className="border-b">
-                    <th className="px-4 py-3 text-left">Nama Siswa</th>
-                    <th className="px-4 py-3 text-left">Ujian</th>
-                    <th className="px-4 py-3 text-left">Mata Pelajaran</th>
-                    <th className="px-4 py-3 text-left">Kelas</th>
-                    <th className="px-4 py-3 text-left">Nilai</th>
-                    <th className="px-4 py-3 text-left">Grade</th>
-                    <th className="px-4 py-3 text-left">Status</th>
-                    <th className="px-4 py-3 text-left">Aksi</th>
+                    <th className="px-4 py-3 text-left text-sm font-semibold">Nama Siswa</th>
+                    <th className="px-4 py-3 text-left text-sm font-semibold">Ujian</th>
+                    <th className="px-4 py-3 text-left text-sm font-semibold">Mata Pelajaran</th>
+                    <th className="px-4 py-3 text-left text-sm font-semibold">Kelas</th>
+                    <th className="px-4 py-3 text-left text-sm font-semibold">Nilai</th>
+                    <th className="px-4 py-3 text-left text-sm font-semibold">Grade</th>
+                    <th className="px-4 py-3 text-left text-sm font-semibold">Status</th>
+                    <th className="px-4 py-3 text-left text-sm font-semibold">Aksi</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -195,45 +262,72 @@ export default function ExamResultsPage() {
                     const isPassed = result.score >= 75;
 
                     return (
-                      <tr key={result.id} className="border-b hover:bg-gray-50">
-                        <td className="px-4 py-3 font-medium">{result.student.user.name}</td>
-                        <td className="px-4 py-3">{result.exam.title}</td>
-                        <td className="px-4 py-3">{result.exam.subject.name}</td>
-                        <td className="px-4 py-3">{result.exam.class.name}</td>
+                      <tr key={result.id} className="border-b transition-colors hover:bg-gray-50">
                         <td className="px-4 py-3">
-                          <span
-                            className={`font-bold ${
-                              isPassed ? "text-green-600" : "text-red-600"
-                            }`}
-                          >
-                            {result.score}
+                          <div className="flex items-center gap-2">
+                            <div className="rounded-full bg-amber-100 p-1.5">
+                              <Users className="h-3.5 w-3.5 text-amber-600" />
+                            </div>
+                            <span className="font-medium">{result.student.user.name}</span>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 text-sm">{result.exam.title}</td>
+                        <td className="px-4 py-3">
+                          <span className="rounded-md bg-gray-100 px-2 py-1 text-xs font-medium text-gray-700">
+                            {result.exam.subject.name}
                           </span>
+                        </td>
+                        <td className="px-4 py-3 text-sm">{result.exam.class.name}</td>
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-2">
+                            <div
+                              className={`flex h-10 w-10 items-center justify-center rounded-lg ${
+                                isPassed ? "bg-green-100" : "bg-red-100"
+                              }`}
+                            >
+                              <span
+                                className={`text-lg font-bold ${
+                                  isPassed ? "text-green-600" : "text-red-600"
+                                }`}
+                              >
+                                {result.score}
+                              </span>
+                            </div>
+                          </div>
                         </td>
                         <td className="px-4 py-3">
                           {result.grade ? (
-                            <span className="rounded-full bg-blue-100 px-2 py-1 text-xs text-blue-700">
+                            <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-700">
                               {result.grade}
                             </span>
                           ) : (
-                            "-"
+                            <span className="text-xs text-muted-foreground">-</span>
                           )}
                         </td>
                         <td className="px-4 py-3">
                           {isPassed ? (
-                            <span className="rounded-full bg-green-100 px-2 py-1 text-xs text-green-700">
+                            <span className="flex items-center gap-1 rounded-full bg-green-100 px-2.5 py-1 text-xs font-medium text-green-700">
+                              <CheckCircle2 className="h-3 w-3" />
                               Lulus
                             </span>
                           ) : (
-                            <span className="rounded-full bg-red-100 px-2 py-1 text-xs text-red-700">
+                            <span className="flex items-center gap-1 rounded-full bg-red-100 px-2.5 py-1 text-xs font-medium text-red-700">
+                              <XCircle className="h-3 w-3" />
                               Tidak Lulus
                             </span>
                           )}
                         </td>
                         <td className="px-4 py-3">
-                          <button className="mr-3 text-sm text-blue-600 hover:underline">
-                            Edit
-                          </button>
-                          <button className="text-sm text-red-600 hover:underline">Hapus</button>
+                          <div className="flex gap-2">
+                            <button className="flex items-center gap-1 rounded-lg border border-amber-200 bg-amber-50 px-2.5 py-1.5 text-xs font-medium text-amber-700 transition-all hover:bg-amber-100">
+                              <Pencil className="h-3 w-3" />
+                              Edit
+                            </button>
+                            <button className="flex items-center gap-1 rounded-lg border border-red-200 bg-red-50 px-2.5 py-1.5 text-xs font-medium text-red-700 transition-all hover:bg-red-100">
+                              <Trash2 className="h-3 w-3" />
+                              Hapus
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     );
@@ -242,9 +336,13 @@ export default function ExamResultsPage() {
               </table>
             </div>
           ) : (
-            <div className="py-12 text-center text-muted-foreground">
-              <div className="mb-4 text-4xl">📊</div>
-              <p>Belum ada hasil ujian</p>
+            <div className="rounded-lg bg-white py-12 text-center text-muted-foreground">
+              <div className="mb-4 flex justify-center">
+                <div className="rounded-full bg-gray-100 p-6">
+                  <Award className="h-12 w-12 text-gray-400" />
+                </div>
+              </div>
+              <p className="font-medium">Belum ada hasil ujian</p>
               <p className="mt-2 text-sm">Input nilai untuk memulai</p>
             </div>
           )}

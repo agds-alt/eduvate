@@ -2,6 +2,7 @@
 
 import { api } from "~/lib/trpc-provider";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import { School, Plus, Search, Users, GraduationCap, BookOpen, Pencil, Trash2 } from "lucide-react";
 import { useState } from "react";
 
 type ClassForm = {
@@ -157,21 +158,102 @@ export default function ClassesPage() {
   }
 
   return (
-    <div>
-      {/* Header */}
-      <div className="mb-8 flex items-center justify-between">
-        <div>
-          <h2 className="text-3xl font-bold">Data Kelas</h2>
-          <p className="text-muted-foreground">
-            Kelola data kelas dan rombongan belajar
-          </p>
+    <div className="space-y-6">
+      {/* Header Section with Gradient */}
+      <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-purple-600 via-violet-600 to-indigo-600 p-8 text-white shadow-lg">
+        <div className="relative z-10">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="rounded-full bg-white/20 p-4 backdrop-blur-sm">
+                <School className="h-8 w-8" />
+              </div>
+              <div>
+                <h2 className="text-3xl font-bold">Data Kelas</h2>
+                <p className="mt-1 text-purple-100">
+                  Kelola data kelas dan rombongan belajar
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={openAddModal}
+              className="flex items-center gap-2 rounded-lg bg-white px-6 py-3 font-semibold text-purple-600 shadow-lg transition-all hover:bg-white/90"
+            >
+              <Plus className="h-5 w-5" />
+              Tambah Kelas
+            </button>
+          </div>
         </div>
-        <button
-          onClick={openAddModal}
-          className="rounded-lg bg-primary px-4 py-2 text-white hover:bg-primary/90"
-        >
-          + Tambah Kelas
-        </button>
+        {/* Decorative background */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute -right-12 -top-12 h-48 w-48 rounded-full bg-white"></div>
+          <div className="absolute -bottom-8 -left-8 h-32 w-32 rounded-full bg-white"></div>
+        </div>
+      </div>
+
+      {/* Statistics Cards */}
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
+        <Card className="overflow-hidden border-l-4 border-l-purple-500 transition-all hover:shadow-lg">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Total Kelas</p>
+                <p className="mt-2 text-3xl font-bold">{pagination?.total || 0}</p>
+                <p className="mt-1 text-xs text-muted-foreground">Semua rombel</p>
+              </div>
+              <div className="rounded-full bg-purple-100 p-4">
+                <School className="h-7 w-7 text-purple-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="overflow-hidden border-l-4 border-l-blue-500 transition-all hover:shadow-lg">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Total Siswa</p>
+                <p className="mt-2 text-3xl font-bold">
+                  {classes.reduce((sum, c) => sum + c._count.students, 0)}
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">Semua kelas</p>
+              </div>
+              <div className="rounded-full bg-blue-100 p-4">
+                <GraduationCap className="h-7 w-7 text-blue-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="overflow-hidden border-l-4 border-l-green-500 transition-all hover:shadow-lg">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Total Guru</p>
+                <p className="mt-2 text-3xl font-bold">
+                  {classes.reduce((sum, c) => sum + c._count.teachers, 0)}
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">Pengajar aktif</p>
+              </div>
+              <div className="rounded-full bg-green-100 p-4">
+                <Users className="h-7 w-7 text-green-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="overflow-hidden border-l-4 border-l-orange-500 transition-all hover:shadow-lg">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Total Mapel</p>
+                <p className="mt-2 text-3xl font-bold">
+                  {classes.reduce((sum, c) => sum + c._count.subjects, 0)}
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">Mata pelajaran</p>
+              </div>
+              <div className="rounded-full bg-orange-100 p-4">
+                <BookOpen className="h-7 w-7 text-orange-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Modal Form */}
@@ -299,7 +381,7 @@ export default function ClassesPage() {
       )}
 
       {/* Filters Card */}
-      <Card className="mb-6">
+      <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10">
         <CardContent className="pt-6">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             {/* Search */}
@@ -307,16 +389,19 @@ export default function ClassesPage() {
               <label className="mb-2 block text-sm font-medium">
                 Cari Kelas
               </label>
-              <input
-                type="text"
-                placeholder="Nama kelas..."
-                value={search}
-                onChange={(e) => {
-                  setSearch(e.target.value);
-                  setPage(1); // Reset to first page on search
-                }}
-                className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-primary focus:outline-none"
-              />
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+                <input
+                  type="text"
+                  placeholder="Nama kelas..."
+                  value={search}
+                  onChange={(e) => {
+                    setSearch(e.target.value);
+                    setPage(1);
+                  }}
+                  className="w-full rounded-lg border border-input bg-background px-12 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                />
+              </div>
             </div>
 
             {/* Grade Filter */}
@@ -332,7 +417,7 @@ export default function ClassesPage() {
                   );
                   setPage(1);
                 }}
-                className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-primary focus:outline-none"
+                className="w-full rounded-lg border border-input bg-background px-4 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
               >
                 <option value="">Semua Tingkat</option>
                 {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((grade) => (
@@ -348,7 +433,7 @@ export default function ClassesPage() {
               <label className="mb-2 block text-sm font-medium">
                 Tahun Ajaran
               </label>
-              <select className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-primary focus:outline-none">
+              <select className="w-full rounded-lg border border-input bg-background px-4 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
                 <option value="">Semua Tahun</option>
                 <option value="2024/2025">2024/2025</option>
                 <option value="2023/2024">2023/2024</option>
@@ -459,18 +544,20 @@ export default function ClassesPage() {
                     </div>
 
                     {/* Action Buttons */}
-                    <div className="flex space-x-2 pt-2">
+                    <div className="flex gap-2 pt-2">
                       <button
                         onClick={() => openEditModal(classItem)}
-                        className="flex-1 rounded bg-yellow-500 px-3 py-2 text-xs text-white hover:bg-yellow-600"
+                        className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-purple-200 bg-purple-50 px-3 py-2 text-xs font-medium text-purple-700 transition-all hover:bg-purple-100"
                       >
+                        <Pencil className="h-3 w-3" />
                         Edit
                       </button>
                       <button
                         onClick={() => handleDelete(classItem.id, classItem.name)}
                         disabled={deleteMutation.isPending}
-                        className="rounded bg-red-500 px-3 py-2 text-xs text-white hover:bg-red-600 disabled:opacity-50"
+                        className="flex items-center justify-center gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs font-medium text-red-700 transition-all hover:bg-red-100 disabled:opacity-50"
                       >
+                        <Trash2 className="h-3 w-3" />
                         {deleteMutation.isPending ? "..." : "Hapus"}
                       </button>
                     </div>

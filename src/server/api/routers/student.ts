@@ -168,6 +168,19 @@ export const studentRouter = createTRPCRouter({
         enrollmentYear: z.number().int().min(2000).max(2100).optional(),
         graduationYear: z.number().int().min(2000).max(2100).optional(),
         currentClassId: z.string().optional(),
+        distanceToSchool: z.string().optional(),
+        previousSchool: z.string().optional(),
+
+        // Parent/Guardian details
+        parents: z.array(
+          z.object({
+            name: z.string(),
+            phone: z.string().optional(),
+            email: z.string().email().optional(),
+            occupation: z.string().optional(),
+            relationship: z.string(),
+          })
+        ).optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -207,12 +220,74 @@ export const studentRouter = createTRPCRouter({
           enrollmentYear: input.enrollmentYear,
           graduationYear: input.graduationYear,
           currentClassId: input.currentClassId,
+          distanceToSchool: input.distanceToSchool,
+          previousSchool: input.previousSchool,
         },
         include: {
           user: true,
           currentClass: true,
         },
       });
+
+      // Create parent records if provided
+      if (input.parents && input.parents.length > 0) {
+        for (const parentData of input.parents) {
+          // Check if parent user already exists by email or phone
+          let parentUser = null;
+          if (parentData.email) {
+            parentUser = await ctx.db.user.findFirst({
+              where: { email: parentData.email },
+            });
+          }
+
+          // If not found and has phone, try by phone
+          if (!parentUser && parentData.phone) {
+            parentUser = await ctx.db.user.findFirst({
+              where: { phone: parentData.phone },
+            });
+          }
+
+          // Create parent user if doesn't exist
+          if (!parentUser) {
+            parentUser = await ctx.db.user.create({
+              data: {
+                name: parentData.name,
+                email: parentData.email,
+                phone: parentData.phone,
+                role: "PARENT",
+                schoolId: school.id,
+                password: hashedPassword, // Use same password as student temporarily
+              },
+            });
+          }
+
+          // Check if parent record exists
+          let parent = await ctx.db.parent.findUnique({
+            where: { userId: parentUser.id },
+          });
+
+          // Create parent record if doesn't exist
+          if (!parent) {
+            parent = await ctx.db.parent.create({
+              data: {
+                userId: parentUser.id,
+                schoolId: school.id,
+                occupation: parentData.occupation,
+              },
+            });
+          }
+
+          // Create StudentParent relationship
+          await ctx.db.studentParent.create({
+            data: {
+              studentId: student.id,
+              parentId: parent.id,
+              relationship: parentData.relationship,
+              isPrimary: parentData.relationship === "Ayah Kandung",
+            },
+          });
+        }
+      }
 
       // Update school active users count
       await ctx.db.school.update({
@@ -246,10 +321,23 @@ export const studentRouter = createTRPCRouter({
         graduationYear: z.number().int().min(2000).max(2100).optional(),
         currentClassId: z.string().optional().nullable(),
         isAlumni: z.boolean().optional(),
+        distanceToSchool: z.string().optional(),
+        previousSchool: z.string().optional(),
+
+        // Parent/Guardian details
+        parents: z.array(
+          z.object({
+            name: z.string(),
+            phone: z.string().optional(),
+            email: z.string().email().optional(),
+            occupation: z.string().optional(),
+            relationship: z.string(),
+          })
+        ).optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const { id, name, email, phone, address, nik, ...studentData } = input;
+      const { id, name, email, phone, address, nik, parents, ...studentData } = input;
 
       // Get student with user
       const student = await ctx.db.student.findUnique({
@@ -284,6 +372,91 @@ export const studentRouter = createTRPCRouter({
           currentClass: true,
         },
       });
+
+      // Update parent records if provided
+      if (parents && parents.length > 0) {
+        // Delete existing StudentParent relationships
+        await ctx.db.studentParent.deleteMany({
+          where: { studentId: id },
+        });
+
+        // Create new parent records
+        const hashedPassword = await bcrypt.hash("defaultPassword123", 10);
+
+        for (const parentData of parents) {
+          // Check if parent user already exists by email or phone
+          let parentUser = null;
+          if (parentData.email) {
+            parentUser = await ctx.db.user.findFirst({
+              where: { email: parentData.email },
+            });
+          }
+
+          // If not found and has phone, try by phone
+          if (!parentUser && parentData.phone) {
+            parentUser = await ctx.db.user.findFirst({
+              where: { phone: parentData.phone },
+            });
+          }
+
+          // Create or update parent user
+          if (!parentUser) {
+            parentUser = await ctx.db.user.create({
+              data: {
+                name: parentData.name,
+                email: parentData.email,
+                phone: parentData.phone,
+                role: "PARENT",
+                schoolId: student.schoolId,
+                password: hashedPassword,
+              },
+            });
+          } else {
+            // Update existing user
+            parentUser = await ctx.db.user.update({
+              where: { id: parentUser.id },
+              data: {
+                name: parentData.name,
+                ...(parentData.email && { email: parentData.email }),
+                ...(parentData.phone && { phone: parentData.phone }),
+              },
+            });
+          }
+
+          // Check if parent record exists
+          let parent = await ctx.db.parent.findUnique({
+            where: { userId: parentUser.id },
+          });
+
+          // Create or update parent record
+          if (!parent) {
+            parent = await ctx.db.parent.create({
+              data: {
+                userId: parentUser.id,
+                schoolId: student.schoolId,
+                occupation: parentData.occupation,
+              },
+            });
+          } else {
+            parent = await ctx.db.parent.update({
+              where: { id: parent.id },
+              data: {
+                occupation: parentData.occupation,
+              },
+            });
+          }
+
+          // Create new StudentParent relationship
+          await ctx.db.studentParent.create({
+            data: {
+              studentId: id,
+              parentId: parent.id,
+              relationship: parentData.relationship,
+              isPrimary: parentData.relationship === "Ayah Kandung",
+            },
+          });
+        }
+      }
 
       return updatedStudent;
     }),

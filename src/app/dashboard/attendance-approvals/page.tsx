@@ -138,59 +138,78 @@ export default function AttendanceApprovalsPage() {
     <div>
       <Toaster />
 
-      {/* Header */}
-      <div className="mb-8">
-        <h2 className="text-3xl font-bold">Persetujuan Absensi</h2>
-        <p className="text-muted-foreground">
-          Kelola permintaan izin pulang awal dari guru
-        </p>
+      {/* Header with Gradient */}
+      <div className="relative mb-8 overflow-hidden rounded-xl bg-gradient-to-r from-cyan-600 via-sky-600 to-blue-600 p-8 text-white shadow-lg">
+        <div className="relative z-10">
+          <div className="flex items-center gap-4">
+            <div className="rounded-full bg-white/20 p-4 backdrop-blur-sm">
+              <CheckCircle className="h-8 w-8" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold">Persetujuan Absensi</h2>
+              <p className="mt-1 text-cyan-100">
+                Kelola permintaan izin pulang awal dari guru
+              </p>
+            </div>
+          </div>
+        </div>
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute -right-12 -top-12 h-48 w-48 rounded-full bg-white"></div>
+          <div className="absolute -bottom-8 -left-8 h-32 w-32 rounded-full bg-white"></div>
+        </div>
       </div>
 
       {/* Statistics Cards */}
       <div className="mb-6 grid grid-cols-1 gap-6 md:grid-cols-3">
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-4">
-              <div className="rounded-full bg-yellow-100 p-3">
-                <Clock className="h-6 w-6 text-yellow-600" />
-              </div>
+        <Card className="overflow-hidden border-l-4 border-l-yellow-500 transition-all hover:shadow-lg">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
               <div>
-                <div className="text-3xl font-bold text-yellow-600">
+                <p className="text-sm font-medium text-muted-foreground">
+                  Menunggu Persetujuan
+                </p>
+                <p className="mt-2 text-3xl font-bold text-yellow-600">
                   {pendingCount}
-                </div>
-                <p className="text-sm text-muted-foreground">Menunggu Persetujuan</p>
+                </p>
+              </div>
+              <div className="rounded-full bg-yellow-100 p-4">
+                <Clock className="h-7 w-7 text-yellow-600" />
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-4">
-              <div className="rounded-full bg-green-100 p-3">
-                <CheckCircle className="h-6 w-6 text-green-600" />
-              </div>
+        <Card className="overflow-hidden border-l-4 border-l-green-500 transition-all hover:shadow-lg">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
               <div>
-                <div className="text-3xl font-bold text-green-600">
+                <p className="text-sm font-medium text-muted-foreground">
+                  Disetujui
+                </p>
+                <p className="mt-2 text-3xl font-bold text-green-600">
                   {approvedCount}
-                </div>
-                <p className="text-sm text-muted-foreground">Disetujui</p>
+                </p>
+              </div>
+              <div className="rounded-full bg-green-100 p-4">
+                <CheckCircle className="h-7 w-7 text-green-600" />
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-4">
-              <div className="rounded-full bg-red-100 p-3">
-                <XCircle className="h-6 w-6 text-red-600" />
-              </div>
+        <Card className="overflow-hidden border-l-4 border-l-red-500 transition-all hover:shadow-lg">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
               <div>
-                <div className="text-3xl font-bold text-red-600">
+                <p className="text-sm font-medium text-muted-foreground">
+                  Ditolak
+                </p>
+                <p className="mt-2 text-3xl font-bold text-red-600">
                   {rejectedCount}
-                </div>
-                <p className="text-sm text-muted-foreground">Ditolak</p>
+                </p>
+              </div>
+              <div className="rounded-full bg-red-100 p-4">
+                <XCircle className="h-7 w-7 text-red-600" />
               </div>
             </div>
           </CardContent>

@@ -7,7 +7,7 @@ import { api } from "~/trpc/react";
 import { format, getDaysInMonth } from "date-fns";
 import { id } from "date-fns/locale";
 import { AttendanceStatus } from "@prisma/client";
-import { Download, ChevronLeft, ChevronRight } from "lucide-react";
+import { Download, ChevronLeft, ChevronRight, Calendar, Filter, CheckCircle2, Clock, XCircle, Thermometer, FileText, Shield } from "lucide-react";
 
 export default function MonthlyLogPage() {
   const currentDate = new Date();
@@ -176,22 +176,46 @@ export default function MonthlyLogPage() {
 
   return (
     <div>
-      <div className="mb-8 flex items-center justify-between">
-        <div>
-          <h2 className="text-3xl font-bold">Log Absensi Bulanan</h2>
-          <p className="text-muted-foreground">Rekap absensi per bulan</p>
+      {/* Header with Gradient */}
+      <div className="relative mb-8 overflow-hidden rounded-xl bg-gradient-to-r from-cyan-600 via-sky-600 to-blue-600 p-8 text-white shadow-lg">
+        <div className="relative z-10">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="rounded-full bg-white/20 p-4 backdrop-blur-sm">
+                <Calendar className="h-8 w-8" />
+              </div>
+              <div>
+                <h2 className="text-3xl font-bold">Log Absensi Bulanan</h2>
+                <p className="mt-1 text-cyan-100">
+                  Rekap absensi per bulan
+                </p>
+              </div>
+            </div>
+            <Button
+              onClick={handleExport}
+              disabled={students.length === 0}
+              className="bg-white text-cyan-600 hover:bg-white/90 shadow-lg"
+            >
+              <Download className="mr-2 h-4 w-4" />
+              Export CSV
+            </Button>
+          </div>
         </div>
-        <Button onClick={handleExport} disabled={students.length === 0}>
-          <Download className="mr-2 h-4 w-4" />
-          Export CSV
-        </Button>
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute -right-12 -top-12 h-48 w-48 rounded-full bg-white"></div>
+          <div className="absolute -bottom-8 -left-8 h-32 w-32 rounded-full bg-white"></div>
+        </div>
       </div>
 
-      <Card className="mb-6">
+      {/* Filter Card */}
+      <Card className="mb-6 border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10">
         <CardContent className="pt-6">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
-              <label className="mb-2 block text-sm font-medium">Bulan & Tahun</label>
+              <label className="mb-2 flex items-center gap-2 text-sm font-medium">
+                <Calendar className="h-4 w-4 text-cyan-600" />
+                Bulan & Tahun
+              </label>
               <div className="flex items-center gap-2">
                 <Button variant="outline" size="icon" onClick={handlePreviousMonth}>
                   <ChevronLeft className="h-4 w-4" />
@@ -205,9 +229,12 @@ export default function MonthlyLogPage() {
               </div>
             </div>
             <div>
-              <label className="mb-2 block text-sm font-medium">Kelas</label>
+              <label className="mb-2 flex items-center gap-2 text-sm font-medium">
+                <Filter className="h-4 w-4 text-sky-600" />
+                Kelas
+              </label>
               <select
-                className="w-full rounded-lg border border-input bg-background px-4 py-2"
+                className="w-full rounded-lg border border-input bg-background px-4 py-2 transition-all focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                 value={selectedClassId}
                 onChange={(e) => setSelectedClassId(e.target.value)}
               >
@@ -223,71 +250,107 @@ export default function MonthlyLogPage() {
         </CardContent>
       </Card>
 
+      {/* Statistics Cards */}
       <div className="mb-6 grid grid-cols-2 gap-4 md:grid-cols-6">
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-green-600">{overallStats.PRESENT}</div>
-              <p className="text-sm text-muted-foreground">Hadir</p>
+        <Card className="overflow-hidden border-l-4 border-l-green-500 transition-all hover:shadow-lg">
+          <CardContent className="p-4">
+            <div className="flex flex-col items-center justify-center">
+              <div className="mb-2 rounded-full bg-green-100 p-2">
+                <CheckCircle2 className="h-5 w-5 text-green-600" />
+              </div>
+              <div className="text-2xl font-bold text-green-600">{overallStats.PRESENT}</div>
+              <p className="text-xs text-muted-foreground">Hadir</p>
             </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-yellow-600">{overallStats.LATE}</div>
-              <p className="text-sm text-muted-foreground">Terlambat</p>
+
+        <Card className="overflow-hidden border-l-4 border-l-yellow-500 transition-all hover:shadow-lg">
+          <CardContent className="p-4">
+            <div className="flex flex-col items-center justify-center">
+              <div className="mb-2 rounded-full bg-yellow-100 p-2">
+                <Clock className="h-5 w-5 text-yellow-600" />
+              </div>
+              <div className="text-2xl font-bold text-yellow-600">{overallStats.LATE}</div>
+              <p className="text-xs text-muted-foreground">Terlambat</p>
             </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-red-600">{overallStats.ABSENT}</div>
-              <p className="text-sm text-muted-foreground">Alpa</p>
+
+        <Card className="overflow-hidden border-l-4 border-l-red-500 transition-all hover:shadow-lg">
+          <CardContent className="p-4">
+            <div className="flex flex-col items-center justify-center">
+              <div className="mb-2 rounded-full bg-red-100 p-2">
+                <XCircle className="h-5 w-5 text-red-600" />
+              </div>
+              <div className="text-2xl font-bold text-red-600">{overallStats.ABSENT}</div>
+              <p className="text-xs text-muted-foreground">Alpa</p>
             </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-blue-600">{overallStats.SICK}</div>
-              <p className="text-sm text-muted-foreground">Sakit</p>
+
+        <Card className="overflow-hidden border-l-4 border-l-blue-500 transition-all hover:shadow-lg">
+          <CardContent className="p-4">
+            <div className="flex flex-col items-center justify-center">
+              <div className="mb-2 rounded-full bg-blue-100 p-2">
+                <Thermometer className="h-5 w-5 text-blue-600" />
+              </div>
+              <div className="text-2xl font-bold text-blue-600">{overallStats.SICK}</div>
+              <p className="text-xs text-muted-foreground">Sakit</p>
             </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-purple-600">{overallStats.PERMISSION}</div>
-              <p className="text-sm text-muted-foreground">Izin</p>
+
+        <Card className="overflow-hidden border-l-4 border-l-purple-500 transition-all hover:shadow-lg">
+          <CardContent className="p-4">
+            <div className="flex flex-col items-center justify-center">
+              <div className="mb-2 rounded-full bg-purple-100 p-2">
+                <FileText className="h-5 w-5 text-purple-600" />
+              </div>
+              <div className="text-2xl font-bold text-purple-600">{overallStats.PERMISSION}</div>
+              <p className="text-xs text-muted-foreground">Izin</p>
             </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-gray-600">{overallStats.EXCUSED}</div>
-              <p className="text-sm text-muted-foreground">Dispensasi</p>
+
+        <Card className="overflow-hidden border-l-4 border-l-gray-500 transition-all hover:shadow-lg">
+          <CardContent className="p-4">
+            <div className="flex flex-col items-center justify-center">
+              <div className="mb-2 rounded-full bg-gray-100 p-2">
+                <Shield className="h-5 w-5 text-gray-600" />
+              </div>
+              <div className="text-2xl font-bold text-gray-600">{overallStats.EXCUSED}</div>
+              <p className="text-xs text-muted-foreground">Dispensasi</p>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      <Card>
+      {/* Data Table */}
+      <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10">
         <CardHeader>
-          <CardTitle>Rekap Absensi - {monthName}</CardTitle>
+          <div className="flex items-center gap-2">
+            <div className="rounded-full bg-cyan-100 p-2">
+              <Calendar className="h-5 w-5 text-cyan-600" />
+            </div>
+            <CardTitle>Rekap Absensi - {monthName}</CardTitle>
+          </div>
         </CardHeader>
         <CardContent>
           {isLoading ? (
             <div className="py-12 text-center text-muted-foreground">
-              <div className="mb-4 text-4xl">⏳</div>
+              <div className="mb-4 flex justify-center">
+                <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+              </div>
               <p>Memuat data...</p>
             </div>
           ) : students.length === 0 ? (
-            <div className="py-12 text-center text-muted-foreground">
-              <div className="mb-4 text-4xl">📄</div>
-              <p>Tidak ada data absensi untuk bulan ini</p>
+            <div className="rounded-lg bg-white py-12 text-center text-muted-foreground">
+              <div className="mb-4 flex justify-center">
+                <div className="rounded-full bg-gray-100 p-6">
+                  <Calendar className="h-12 w-12 text-gray-400" />
+                </div>
+              </div>
+              <p className="font-medium">Tidak ada data absensi untuk bulan ini</p>
             </div>
           ) : (
             <>

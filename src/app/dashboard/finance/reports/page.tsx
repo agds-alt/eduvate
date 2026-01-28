@@ -111,15 +111,35 @@ export default function FinanceReportsPage() {
 
   return (
     <div>
-      <div className="mb-8 flex items-center justify-between">
-        <div>
-          <h2 className="text-3xl font-bold">Laporan Keuangan</h2>
-          <p className="text-muted-foreground">Laporan pemasukan dan pengeluaran sekolah</p>
+      {/* Header with Gradient */}
+      <div className="relative mb-8 overflow-hidden rounded-xl bg-gradient-to-r from-emerald-600 via-green-600 to-teal-600 p-8 text-white shadow-lg">
+        <div className="relative z-10">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="rounded-full bg-white/20 p-4 backdrop-blur-sm">
+                <TrendingUp className="h-8 w-8" />
+              </div>
+              <div>
+                <h2 className="text-3xl font-bold">Laporan Keuangan</h2>
+                <p className="mt-1 text-emerald-100">
+                  Laporan pemasukan dan pengeluaran sekolah
+                </p>
+              </div>
+            </div>
+            <Button
+              onClick={handleExport}
+              disabled={breakdownByType.length === 0}
+              className="bg-white text-emerald-600 hover:bg-white/90 shadow-lg"
+            >
+              <Download className="mr-2 h-4 w-4" />
+              Export CSV
+            </Button>
+          </div>
         </div>
-        <Button onClick={handleExport} disabled={breakdownByType.length === 0}>
-          <Download className="mr-2 h-4 w-4" />
-          Export CSV
-        </Button>
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute -right-12 -top-12 h-48 w-48 rounded-full bg-white"></div>
+          <div className="absolute -bottom-8 -left-8 h-32 w-32 rounded-full bg-white"></div>
+        </div>
       </div>
 
       <Card className="mb-6">
@@ -162,37 +182,66 @@ export default function FinanceReportsPage() {
         </CardContent>
       </Card>
 
+      {/* Stats Cards */}
       <div className="mb-6 grid grid-cols-1 gap-6 md:grid-cols-3">
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-center">
-              <TrendingUp className="mx-auto mb-2 h-8 w-8 text-green-600" />
-              <div className="text-3xl font-bold text-green-600">{formatCurrency(totalIncome)}</div>
-              <p className="text-sm text-muted-foreground">Total Pemasukan</p>
-              <p className="mt-1 text-xs text-muted-foreground">
-                {format(dateRange.startDate, "dd MMM", { locale: id })} -{" "}
-                {format(dateRange.endDate, "dd MMM yyyy", { locale: id })}
-              </p>
+        <Card className="overflow-hidden border-l-4 border-l-green-500 transition-all hover:shadow-lg">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Total Pemasukan
+                </p>
+                <p className="mt-2 text-2xl font-bold text-green-600">
+                  {formatCurrency(totalIncome)}
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {format(dateRange.startDate, "dd MMM", { locale: id })} -{" "}
+                  {format(dateRange.endDate, "dd MMM yyyy", { locale: id })}
+                </p>
+              </div>
+              <div className="rounded-full bg-green-100 p-4">
+                <TrendingUp className="h-7 w-7 text-green-600" />
+              </div>
             </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-center">
-              <TrendingDown className="mx-auto mb-2 h-8 w-8 text-yellow-600" />
-              <div className="text-3xl font-bold text-yellow-600">{formatCurrency(totalPending)}</div>
-              <p className="text-sm text-muted-foreground">Total Pending</p>
-              <p className="mt-1 text-xs text-muted-foreground">Belum dibayar / Sebagian</p>
+        <Card className="overflow-hidden border-l-4 border-l-yellow-500 transition-all hover:shadow-lg">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Total Pending
+                </p>
+                <p className="mt-2 text-2xl font-bold text-yellow-600">
+                  {formatCurrency(totalPending)}
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Belum dibayar / Sebagian
+                </p>
+              </div>
+              <div className="rounded-full bg-yellow-100 p-4">
+                <TrendingDown className="h-7 w-7 text-yellow-600" />
+              </div>
             </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-center">
-              <DollarSign className="mx-auto mb-2 h-8 w-8 text-blue-600" />
-              <div className="text-3xl font-bold text-blue-600">{formatCurrency(balance)}</div>
-              <p className="text-sm text-muted-foreground">Saldo Diterima</p>
-              <p className="mt-1 text-xs text-muted-foreground">Total yang sudah dibayar</p>
+        <Card className="overflow-hidden border-l-4 border-l-blue-500 transition-all hover:shadow-lg">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Saldo Diterima
+                </p>
+                <p className="mt-2 text-2xl font-bold text-blue-600">
+                  {formatCurrency(balance)}
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Total yang sudah dibayar
+                </p>
+              </div>
+              <div className="rounded-full bg-blue-100 p-4">
+                <DollarSign className="h-7 w-7 text-blue-600" />
+              </div>
             </div>
           </CardContent>
         </Card>

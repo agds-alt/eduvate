@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
 import { toast } from "sonner";
-import { Clock, Scan, Fingerprint, HandMetal, CheckCircle } from "lucide-react";
+import { Clock, Scan, Fingerprint, HandMetal, CheckCircle, Settings } from "lucide-react";
 
 export default function AttendanceSettingsPage() {
   // Dummy settings state - in production this would come from API
@@ -36,14 +36,34 @@ export default function AttendanceSettingsPage() {
 
   return (
     <div>
-      <div className="mb-8 flex items-center justify-between">
-        <div>
-          <h2 className="text-3xl font-bold">Pengaturan Absensi</h2>
-          <p className="text-muted-foreground">Konfigurasi sistem absensi sekolah</p>
+      {/* Header with Gradient */}
+      <div className="relative mb-8 overflow-hidden rounded-xl bg-gradient-to-r from-cyan-600 via-sky-600 to-blue-600 p-8 text-white shadow-lg">
+        <div className="relative z-10">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="rounded-full bg-white/20 p-4 backdrop-blur-sm">
+                <Settings className="h-8 w-8" />
+              </div>
+              <div>
+                <h2 className="text-3xl font-bold">Pengaturan Absensi</h2>
+                <p className="mt-1 text-cyan-100">
+                  Konfigurasi sistem absensi sekolah
+                </p>
+              </div>
+            </div>
+            <Button
+              onClick={handleSaveSettings}
+              disabled={isSaving}
+              className="bg-white text-cyan-600 hover:bg-white/90 shadow-lg"
+            >
+              {isSaving ? "Menyimpan..." : "Simpan Pengaturan"}
+            </Button>
+          </div>
         </div>
-        <Button onClick={handleSaveSettings} disabled={isSaving}>
-          {isSaving ? "Menyimpan..." : "Simpan Pengaturan"}
-        </Button>
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute -right-12 -top-12 h-48 w-48 rounded-full bg-white"></div>
+          <div className="absolute -bottom-8 -left-8 h-32 w-32 rounded-full bg-white"></div>
+        </div>
       </div>
 
       <div className="mb-6 grid grid-cols-1 gap-6 md:grid-cols-2">
