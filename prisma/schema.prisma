@@ -141,6 +141,7 @@ model School {
   holidays    Holiday[]
   teacherAttendances TeacherAttendance[]
   earlyDepartureRequests EarlyDepartureRequest[]
+  permissionRequests PermissionRequest[]
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -214,6 +215,7 @@ model Student {
   finance      Finance[]
   bills        Bill[]
   biometricData BiometricData[]
+  permissionRequests PermissionRequest[]
 
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
@@ -860,4 +862,52 @@ model EarlyDepartureRequest {
   @@index([schoolId])
   @@index([attendanceId])
   @@index([status])
+}
+
+// ============================================
+// STUDENT PERMISSION REQUEST (Izin)
+// ============================================
+
+enum PermissionType {
+  SICK          // Sakit
+  PERMISSION    // Izin umum
+  FAMILY_EVENT  // Acara keluarga
+  OTHER         // Lainnya
+}
+
+model PermissionRequest {
+  id          String   @id @default(cuid())
+  schoolId    String
+  school      School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  studentId   String
+  student     Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  // Request details
+  type        PermissionType
+  startDate   DateTime
+  endDate     DateTime
+  reason      String
+  attachmentUrl String? // Optional: surat dokter, undangan, dll
+
+  // Submission info
+  submittedBy String // User ID (student or parent who submitted)
+  submittedAt DateTime @default(now())
+
+  // Approval workflow
+  status              RequestStatus @default(PENDING)
+  approvedBy          String? // User ID (teacher/admin)
+  approvedAt          DateTime?
+  rejectionReason     String?
+
+  // Additional notes
+  notes       String?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([schoolId])
+  @@index([studentId])
+  @@index([status])
+  @@index([startDate])
 }

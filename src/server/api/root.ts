@@ -17,6 +17,7 @@ import { agendaRouter } from "~/server/api/routers/agenda";
 import { informationRouter } from "~/server/api/routers/information";
 import { holidayRouter } from "~/server/api/routers/holiday";
 import { galleryRouter } from "~/server/api/routers/gallery";
+import { permissionRequestRouter } from "~/server/api/routers/permissionRequest";
 
 /**
  * This is the primary router for your server.
@@ -42,6 +43,7 @@ export const appRouter = createTRPCRouter({
   information: informationRouter,
   holiday: holidayRouter,
   gallery: galleryRouter,
+  permissionRequest: permissionRequestRouter,
 });
 
 // export type definition of API
