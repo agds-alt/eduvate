@@ -145,6 +145,8 @@ model School {
   teachingJournals TeachingJournal[]
   behaviorCategories BehaviorCategory[]
   behaviorRecords BehaviorRecord[]
+  extracurriculars Extracurricular[]
+  extracurricularMembers ExtracurricularMember[]
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -177,6 +179,7 @@ model Teacher {
   grades      Grade[]
   teacherAttendances TeacherAttendance[]
   teachingJournals TeachingJournal[]
+  extracurriculars Extracurricular[]
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -221,6 +224,7 @@ model Student {
   biometricData BiometricData[]
   permissionRequests PermissionRequest[]
   behaviorRecords BehaviorRecord[]
+  extracurricularMembers ExtracurricularMember[]
 
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
@@ -1036,4 +1040,67 @@ model BehaviorRecord {
   @@index([studentId])
   @@index([categoryId])
   @@index([date])
+}
+
+// ============================================
+// EXTRACURRICULAR PROGRAMS (Ekstrakurikuler)
+// ============================================
+
+model Extracurricular {
+  id          String   @id @default(cuid())
+  schoolId    String
+  school      School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  name        String // Nama ekstrakurikuler (misal: Basket, Pramuka, PMR)
+  description String?
+  category    String // Olahraga, Seni, Akademik, Organisasi, dll
+
+  // Coach/Pembina
+  coachId     String?
+  coach       Teacher? @relation(fields: [coachId], references: [id])
+
+  // Schedule
+  schedule    String? // Misal: "Rabu, 15:00-17:00"
+  location    String? // Lokasi kegiatan
+
+  maxCapacity Int? // Kuota maksimal peserta
+  isActive    Boolean  @default(true)
+
+  // Relations
+  members     ExtracurricularMember[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([schoolId])
+  @@index([coachId])
+  @@index([category])
+}
+
+model ExtracurricularMember {
+  id                String   @id @default(cuid())
+  schoolId          String
+  school            School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  extracurricularId String
+  extracurricular   Extracurricular @relation(fields: [extracurricularId], references: [id], onDelete: Cascade)
+
+  studentId         String
+  student           Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  // Status
+  joinDate          DateTime @default(now())
+  status            String   @default("ACTIVE") // ACTIVE, INACTIVE, GRADUATED
+
+  // Notes
+  notes             String?
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@unique([extracurricularId, studentId]) // Prevent duplicate enrollment
+  @@index([schoolId])
+  @@index([extracurricularId])
+  @@index([studentId])
+  @@index([status])
 }

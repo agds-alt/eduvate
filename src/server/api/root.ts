@@ -21,6 +21,7 @@ import { permissionRequestRouter } from "~/server/api/routers/permissionRequest"
 import { teachingJournalRouter } from "~/server/api/routers/teachingJournal";
 import { behaviorCategoryRouter } from "~/server/api/routers/behaviorCategory";
 import { behaviorRecordRouter } from "~/server/api/routers/behaviorRecord";
+import { extracurricularRouter } from "~/server/api/routers/extracurricular";
 
 /**
  * This is the primary router for your server.
@@ -50,6 +51,7 @@ export const appRouter = createTRPCRouter({
   teachingJournal: teachingJournalRouter,
   behaviorCategory: behaviorCategoryRouter,
   behaviorRecord: behaviorRecordRouter,
+  extracurricular: extracurricularRouter,
 });
 
 // export type definition of API
