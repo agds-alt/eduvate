@@ -147,6 +147,8 @@ model School {
   behaviorRecords BehaviorRecord[]
   extracurriculars Extracurricular[]
   extracurricularMembers ExtracurricularMember[]
+  religiousPrograms ReligiousProgram[]
+  religiousProgramParticipants ReligiousProgramParticipant[]
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -180,6 +182,7 @@ model Teacher {
   teacherAttendances TeacherAttendance[]
   teachingJournals TeachingJournal[]
   extracurriculars Extracurricular[]
+  religiousPrograms ReligiousProgram[] @relation("ReligiousInstructor")
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -225,6 +228,7 @@ model Student {
   permissionRequests PermissionRequest[]
   behaviorRecords BehaviorRecord[]
   extracurricularMembers ExtracurricularMember[]
+  religiousProgramParticipants ReligiousProgramParticipant[]
 
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
@@ -1101,6 +1105,69 @@ model ExtracurricularMember {
   @@unique([extracurricularId, studentId]) // Prevent duplicate enrollment
   @@index([schoolId])
   @@index([extracurricularId])
+  @@index([studentId])
+  @@index([status])
+}
+
+// ============================================
+// RELIGIOUS PROGRAMS (Program Keagamaan)
+// ============================================
+
+model ReligiousProgram {
+  id          String   @id @default(cuid())
+  schoolId    String
+  school      School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  name        String // Nama program (misal: Tahfidz, Kajian Islam, Sholat Dhuha)
+  description String?
+  type        String // DAILY, WEEKLY, MONTHLY, EVENT
+
+  // Instructor/Ustadz
+  instructorId String?
+  instructor   Teacher? @relation("ReligiousInstructor", fields: [instructorId], references: [id])
+
+  // Schedule
+  schedule    String? // Misal: "Senin & Kamis, 07:00-08:00"
+  location    String?
+
+  targetGrades String[] // Target kelas (misal: ["10", "11", "12"])
+  isActive    Boolean  @default(true)
+
+  // Relations
+  participants ReligiousProgramParticipant[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([schoolId])
+  @@index([instructorId])
+  @@index([type])
+}
+
+model ReligiousProgramParticipant {
+  id              String   @id @default(cuid())
+  schoolId        String
+  school          School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  programId       String
+  program         ReligiousProgram @relation(fields: [programId], references: [id], onDelete: Cascade)
+
+  studentId       String
+  student         Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  // Progress tracking
+  joinDate        DateTime @default(now())
+  status          String   @default("ACTIVE") // ACTIVE, INACTIVE, COMPLETED
+  progress        String? // Progress notes (misal: "Juz 1-3" untuk tahfidz)
+
+  notes           String?
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([programId, studentId])
+  @@index([schoolId])
+  @@index([programId])
   @@index([studentId])
   @@index([status])
 }
