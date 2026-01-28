@@ -142,6 +142,7 @@ model School {
   teacherAttendances TeacherAttendance[]
   earlyDepartureRequests EarlyDepartureRequest[]
   permissionRequests PermissionRequest[]
+  teachingJournals TeachingJournal[]
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -173,6 +174,7 @@ model Teacher {
   attendance  Attendance[]
   grades      Grade[]
   teacherAttendances TeacherAttendance[]
+  teachingJournals TeachingJournal[]
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -288,6 +290,7 @@ model Class {
   attendance  Attendance[]
   tuitions    Tuition[]
   attendanceSchedules AttendanceSchedule[]
+  teachingJournals TeachingJournal[]
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -327,6 +330,7 @@ model Subject {
   classes      ClassSubject[]
   exams        Exam[]
   grades       Grade[]
+  teachingJournals TeachingJournal[]
 
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
@@ -910,4 +914,63 @@ model PermissionRequest {
   @@index([studentId])
   @@index([status])
   @@index([startDate])
+}
+
+// ============================================
+// PEMBELAJARAN (LEARNING) - Teaching Journal
+// ============================================
+
+model TeachingJournal {
+  id          String   @id @default(cuid())
+  schoolId    String
+  school      School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  teacherId   String
+  teacher     Teacher  @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+
+  classId     String
+  class       Class    @relation(fields: [classId], references: [id], onDelete: Cascade)
+
+  subjectId   String
+  subject     Subject  @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+
+  // Journal details
+  date        DateTime @db.Date
+  startTime   String // HH:mm format
+  endTime     String // HH:mm format
+
+  topic       String // Topik pembelajaran
+  material    String // Materi yang diajarkan
+  method      String? // Metode pembelajaran (Ceramah, Diskusi, Praktik, dll)
+
+  // Learning objectives
+  objectives  String // Tujuan pembelajaran
+
+  // Teaching activities
+  activities  String // Kegiatan pembelajaran
+
+  // Assessment
+  assessment  String? // Penilaian/evaluasi
+
+  // Homework
+  homework    String? // Tugas/PR yang diberikan
+
+  // Notes
+  notes       String? // Catatan tambahan
+  obstacles   String? // Kendala yang dihadapi
+
+  // Attendance summary
+  totalStudents   Int @default(0)
+  presentStudents Int @default(0)
+  absentStudents  Int @default(0)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([teacherId, classId, subjectId, date, startTime])
+  @@index([schoolId])
+  @@index([teacherId])
+  @@index([classId])
+  @@index([subjectId])
+  @@index([date])
 }
