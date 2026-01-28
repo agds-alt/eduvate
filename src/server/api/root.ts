@@ -20,6 +20,7 @@ import { galleryRouter } from "~/server/api/routers/gallery";
 import { permissionRequestRouter } from "~/server/api/routers/permissionRequest";
 import { teachingJournalRouter } from "~/server/api/routers/teachingJournal";
 import { behaviorCategoryRouter } from "~/server/api/routers/behaviorCategory";
+import { behaviorRecordRouter } from "~/server/api/routers/behaviorRecord";
 
 /**
  * This is the primary router for your server.
@@ -48,6 +49,7 @@ export const appRouter = createTRPCRouter({
   permissionRequest: permissionRequestRouter,
   teachingJournal: teachingJournalRouter,
   behaviorCategory: behaviorCategoryRouter,
+  behaviorRecord: behaviorRecordRouter,
 });
 
 // export type definition of API
