@@ -143,6 +143,8 @@ model School {
   earlyDepartureRequests EarlyDepartureRequest[]
   permissionRequests PermissionRequest[]
   teachingJournals TeachingJournal[]
+  behaviorCategories BehaviorCategory[]
+  behaviorRecords BehaviorRecord[]
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -218,6 +220,7 @@ model Student {
   bills        Bill[]
   biometricData BiometricData[]
   permissionRequests PermissionRequest[]
+  behaviorRecords BehaviorRecord[]
 
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
@@ -972,5 +975,65 @@ model TeachingJournal {
   @@index([teacherId])
   @@index([classId])
   @@index([subjectId])
+  @@index([date])
+}
+
+// ============================================
+// SIKAP (BEHAVIOR) - Master Data
+// ============================================
+
+enum BehaviorType {
+  POSITIVE    // Sikap positif/prestasi
+  NEGATIVE    // Pelanggaran
+}
+
+model BehaviorCategory {
+  id          String   @id @default(cuid())
+  schoolId    String
+  school      School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  name        String // Nama kategori (misal: Disiplin, Kejujuran, Keterlambatan)
+  type        BehaviorType // POSITIVE or NEGATIVE
+  points      Int // Poin untuk kategori ini (positif atau negatif)
+  description String?
+
+  isActive    Boolean  @default(true)
+
+  // Relations
+  behaviors   BehaviorRecord[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([schoolId])
+  @@index([type])
+}
+
+model BehaviorRecord {
+  id          String   @id @default(cuid())
+  schoolId    String
+  school      School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  studentId   String
+  student     Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  categoryId  String
+  category    BehaviorCategory @relation(fields: [categoryId], references: [id])
+
+  date        DateTime @db.Date
+  description String // Keterangan detail kejadian
+  points      Int // Copy dari category.points untuk history
+
+  // Recorded by
+  recordedBy  String // User ID (teacher/admin)
+
+  notes       String? // Catatan tambahan
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([schoolId])
+  @@index([studentId])
+  @@index([categoryId])
   @@index([date])
 }
