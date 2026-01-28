@@ -385,5 +385,6 @@ export function Sidebar() {
         <UserMenu collapsed={isCollapsed} />
       </div>
     </aside>
+    </>
   );
 }
