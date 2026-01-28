@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "~/lib/utils";
@@ -37,6 +37,8 @@ import {
   ChevronRight,
   PanelLeftClose,
   PanelLeft,
+  Menu,
+  X,
 } from "lucide-react";
 
 const menuItems = [
@@ -208,6 +210,7 @@ function CollapsibleSection({
 export function Sidebar() {
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [openSections, setOpenSections] = useState<Record<string, boolean>>(() => {
     // Auto-open sections that contain the current path
     const initial: Record<string, boolean> = {};
@@ -220,6 +223,23 @@ export function Sidebar() {
     return initial;
   });
 
+  // Close mobile menu on route change
+  useEffect(() => {
+    setIsMobileOpen(false);
+  }, [pathname]);
+
+  // Prevent body scroll when mobile menu is open
+  useEffect(() => {
+    if (isMobileOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isMobileOpen]);
+
   const toggleSection = (idx: number) => {
     setOpenSections((prev) => ({
       ...prev,
@@ -228,12 +248,41 @@ export function Sidebar() {
   };
 
   return (
-    <aside
-      className={cn(
-        "fixed left-0 top-0 z-40 h-screen border-r bg-gradient-to-b from-white to-gray-50/50 transition-all duration-300",
-        isCollapsed ? "w-20" : "w-64"
+    <>
+      {/* Mobile Menu Button */}
+      <button
+        onClick={() => setIsMobileOpen(!isMobileOpen)}
+        className="fixed left-4 top-4 z-50 rounded-lg bg-white p-2 shadow-lg lg:hidden"
+        aria-label="Toggle Menu"
+      >
+        {isMobileOpen ? (
+          <X className="h-6 w-6 text-gray-700" />
+        ) : (
+          <Menu className="h-6 w-6 text-gray-700" />
+        )}
+      </button>
+
+      {/* Mobile Overlay */}
+      {isMobileOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+          onClick={() => setIsMobileOpen(false)}
+        />
       )}
-    >
+
+      {/* Sidebar */}
+      <aside
+        className={cn(
+          "fixed left-0 top-0 z-40 h-screen border-r bg-gradient-to-b from-white to-gray-50/50 transition-all duration-300",
+          // Mobile: sliding drawer from left
+          "lg:translate-x-0",
+          isMobileOpen ? "translate-x-0" : "-translate-x-full",
+          // Desktop: collapsible sidebar
+          isCollapsed ? "lg:w-20" : "lg:w-64",
+          // Mobile: full width drawer minus some margin
+          "w-64"
+        )}
+      >
       {/* Logo & Toggle */}
       <div className="flex h-16 items-center justify-between border-b bg-white px-4">
         {!isCollapsed && (
@@ -254,9 +303,10 @@ export function Sidebar() {
             E
           </Link>
         )}
+        {/* Desktop collapse button */}
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="rounded-lg p-2 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900"
+          className="hidden rounded-lg p-2 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 lg:block"
           title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
         >
           {isCollapsed ? (
@@ -264,6 +314,14 @@ export function Sidebar() {
           ) : (
             <PanelLeftClose className="h-5 w-5" />
           )}
+        </button>
+        {/* Mobile close button */}
+        <button
+          onClick={() => setIsMobileOpen(false)}
+          className="rounded-lg p-2 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 lg:hidden"
+          aria-label="Close Menu"
+        >
+          <X className="h-5 w-5" />
         </button>
       </div>
 
